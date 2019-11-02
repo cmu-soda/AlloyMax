@@ -91,6 +91,21 @@ public abstract class SATFactory {
                                                  };
 
     /**
+     * The factory that produces instances of the default sat4jmaxsat solver.
+     */
+    public static final SATFactory DefaultSAT4JMax = new SATFactory() {
+        @Override
+        public SATSolver instance() {
+            return new SAT4JMax();
+        }
+
+        @Override
+        public String toString() {
+            return "DefaultSAT4JMaxsat";
+        }
+    };
+
+    /**
      * The factory that produces instances of the "light" sat4j solver. The light
      * solver is suitable for solving many small instances of SAT problems.
      *

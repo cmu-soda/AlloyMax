@@ -23,6 +23,7 @@ package kodkod.engine;
 
 import java.util.Iterator;
 
+import kodkod.ast.Decl;
 import kodkod.ast.Formula;
 import kodkod.ast.IntExpression;
 import kodkod.ast.Relation;
@@ -32,11 +33,11 @@ import kodkod.engine.fol2sat.Translation;
 import kodkod.engine.fol2sat.TranslationLog;
 import kodkod.engine.fol2sat.Translator;
 import kodkod.engine.fol2sat.UnboundLeafException;
-import kodkod.engine.satlab.SATAbortedException;
-import kodkod.engine.satlab.SATProver;
-import kodkod.engine.satlab.SATSolver;
+import kodkod.engine.satlab.*;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
+import kodkod.util.ints.IntIterator;
+import kodkod.util.ints.IntSet;
 
 /**
  * A computational engine for solving relational satisfiability problems. Such a
@@ -156,6 +157,54 @@ public final class Solver implements KodkodSolver {
     }
 
     /**
+     *
+     * @param formula
+     * @param bounds
+     * @param maxDecl
+     * @return
+     * @throws HigherOrderDeclException
+     * @throws UnboundLeafException
+     * @throws AbortedException
+     */
+    public Solution solve(Formula formula, Bounds bounds, Decl maxDecl) throws HigherOrderDeclException, UnboundLeafException, AbortedException {
+        final long startTransl = System.currentTimeMillis();
+
+        try {
+            final Translation.Whole translation = Translator.translate(formula, bounds, options);
+            final long endTransl = System.currentTimeMillis();
+
+            // TODO: a maxsat formula is often UNSAT, will it be simplified to a trivial formula?
+            if (translation.trivial())
+                return trivial(translation, endTransl - startTransl);
+
+            if (!(translation.cnf() instanceof MaxSATSolver)) {
+                throw new UnsupportedOperationException("The solver should be a MaxSAT solver!");
+            }
+            final MaxSATSolver cnf = (MaxSATSolver) translation.cnf();
+            // Add all the primary variables of the corresponding SkolemRelation as soft clauses
+            final IntSet vars = translation.primaryVariables("$" + maxDecl.variable().name());
+            if (vars == null) {
+                throw new IllegalArgumentException("No primary variables for declaration: " + maxDecl.variable().name());
+            }
+            final IntIterator iter = vars.iterator();
+            while (iter.hasNext()) {
+                cnf.addSoftClause(new int[] {iter.next()});
+            }
+
+            options.reporter().solvingCNF(translation.numPrimaryVariables(), cnf.numberOfVariables(), cnf.numberOfClauses());
+            final long startSolve = System.currentTimeMillis();
+            final boolean isSat = cnf.solve();
+            final long endSolve = System.currentTimeMillis();
+
+            final Statistics stats = new Statistics(translation, endTransl - startTransl, endSolve - startSolve);
+            return isSat ? sat(translation, stats) : unsat(translation, stats);
+
+        } catch (SATAbortedException sae) {
+            throw new AbortedException(sae);
+        }
+    }
+
+    /**
      * Attempts to find all solutions to the given formula with respect to the
      * specified bounds or to prove the formula's unsatisfiability. If the operation
      * is successful, the method returns an iterator over n Solution objects. The
@@ -218,7 +267,6 @@ public final class Solver implements KodkodSolver {
     /**
      * Returns the result of solving a sat formula.
      *
-     * @param bounds Bounds with which solve() was called
      * @param translation the translation
      * @param stats translation / solving stats
      * @return the result of solving a sat formula.
