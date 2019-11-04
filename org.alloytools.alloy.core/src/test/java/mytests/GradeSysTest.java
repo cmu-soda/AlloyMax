@@ -12,7 +12,34 @@ import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+
+/*
+  ====================================================
+    Alloy formula:
+  ====================================================
+    abstract sig Resource {}
+    abstract sig Role {}
+    abstract sig Action {}
+    sig Course {}
+
+    one sig Faculty, Student, TA extends Role {}
+    one sig IntGrade, ExtGrade extends Resource {}
+    one sig Assign, Receive extends Action {}
+
+    pred valid[policy: Course -> Role -> Action -> Resource] {
+        all c: Course {
+            // no student can assign external grade
+            Student -> Assign -> IntGrade not in c.policy
+            // no user can both receive and assign external grades
+            no r: Role | (Assign + Receive) in r.(c.policy).ExtGrade
+        }
+    }
+
+    run valid for 1
+  =====================================================
+*/
 
 /*
   ==================================================
@@ -48,7 +75,7 @@ import java.util.List;
     this/Course = this/Course
   ==================================================
 */
-public final class BankTest {
+public final class GradeSysTest {
 
     public static void main(String[] args) throws Exception {
 
@@ -223,6 +250,7 @@ public final class BankTest {
         Formula x14 = Formula.compose(FormulaOperator.AND, x15, x17, x19, x22, x24, x56, x57, x58, x59, x60, x61, x62, x63, x64, x65, x66, x67, x68, x69);
 
         Solver solver = new Solver();
+//        solver.options().setSolver(SATFactory.DefaultSAT4J);
         solver.options().setSolver(SATFactory.DefaultSAT4JMax);
         solver.options().setBitwidth(4);
 //    solver.options().setFlatten(false);
@@ -231,8 +259,17 @@ public final class BankTest {
         solver.options().setSkolemDepth(0);
         System.out.println("Solving...");
         System.out.flush();
+//        Solution sol = solver.solve(x14, bounds);
         Solution sol = solver.solve(x14, bounds, x25.get(0));
         System.out.println(sol.toString());
+        System.out.println("The set of policy is:");
+        TupleSet set = sol.instance().tuples("$valid_policy");
+        if (set != null) {
+            final Iterator iter = set.iterator();
+            while (iter.hasNext()) {
+                System.out.println(iter.next());
+            }
+        }
     }
 }
 
