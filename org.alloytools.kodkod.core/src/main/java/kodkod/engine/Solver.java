@@ -203,6 +203,7 @@ public final class Solver implements KodkodSolver {
                 // Get the primary variables by the name of the relation
                 final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
                 if (vars == null) {
+                    // This is probably caused by the use of MAXSOME or MINSOME quantifier in set comprehension.
                     throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
                 }
                 final IntIterator iter = vars.iterator();
