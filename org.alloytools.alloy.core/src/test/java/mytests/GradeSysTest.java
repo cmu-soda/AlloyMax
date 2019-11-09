@@ -256,11 +256,10 @@ public final class GradeSysTest {
 //    solver.options().setFlatten(false);
         solver.options().setIntEncoding(Options.IntEncoding.TWOSCOMPLEMENT);
         solver.options().setSymmetryBreaking(20);
-        solver.options().setSkolemDepth(0);
+        solver.options().setSkolemDepth(1);
         System.out.println("Solving...");
         System.out.flush();
-//        Solution sol = solver.solve(x14, bounds);
-        Solution sol = solver.solve(x14, bounds, x25.get(0));
+        Solution sol = solver.solve(x14, bounds);
         System.out.println(sol.toString());
         System.out.println("The set of policy is:");
         TupleSet set = sol.instance().tuples("$valid_policy");
