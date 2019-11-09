@@ -232,7 +232,7 @@ public final class GradeSysTest {
         Formula x41 = x42.and(x47);
         Formula x38 = x41.forAll(x39);
         Formula x33 = x34.and(x38);
-        Formula x24 = x33.forSome(x25);
+        Formula x24 = x33.forMaxSome(x25);
         Formula x56 = x0.eq(x0);
         Formula x57 = x1.eq(x1);
         Formula x58 = x2.eq(x2);

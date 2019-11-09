@@ -757,6 +757,8 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 ret = interpreter.factory().accumulate(and);
                 break;
             case SOME :
+            case MAXSOME :
+            case MINSOME :
                 final BooleanAccumulator or = BooleanAccumulator.treeGate(Operator.OR);
                 some(quantFormula.decls(), quantFormula.formula(), 0, BooleanConstant.TRUE, or);
                 ret = interpreter.factory().accumulate(or);

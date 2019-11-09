@@ -21,23 +21,24 @@
  */
 package kodkod.engine;
 
-import java.util.Iterator;
-
-import kodkod.ast.Decl;
-import kodkod.ast.Formula;
-import kodkod.ast.IntExpression;
-import kodkod.ast.Relation;
+import kodkod.ast.*;
+import kodkod.ast.operator.Quantifier;
+import kodkod.ast.visitor.AbstractCollector;
 import kodkod.engine.config.Options;
-import kodkod.engine.fol2sat.HigherOrderDeclException;
-import kodkod.engine.fol2sat.Translation;
-import kodkod.engine.fol2sat.TranslationLog;
-import kodkod.engine.fol2sat.Translator;
-import kodkod.engine.fol2sat.UnboundLeafException;
-import kodkod.engine.satlab.*;
+import kodkod.engine.fol2sat.*;
+import kodkod.engine.satlab.MaxSATSolver;
+import kodkod.engine.satlab.SATAbortedException;
+import kodkod.engine.satlab.SATProver;
+import kodkod.engine.satlab.SATSolver;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
 import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A computational engine for solving relational satisfiability problems. Such a
@@ -62,6 +63,35 @@ import kodkod.util.ints.IntSet;
  * @author Emina Torlak
  */
 public final class Solver implements KodkodSolver {
+
+    /**
+     * @author Changjian Zhang
+     */
+    private static class MaximalityQuantifierFinder extends AbstractCollector<QuantifiedFormula> {
+
+        protected MaximalityQuantifierFinder(Set<Node> cached) {
+            super(cached);
+        }
+
+        @Override
+        protected Set<QuantifiedFormula> newSet() {
+            return new LinkedHashSet<>();
+        }
+
+        @Override
+        public Set<QuantifiedFormula> visit(QuantifiedFormula quantFormula) {
+            Set<QuantifiedFormula> ret = lookup(quantFormula);
+            if (ret != null)
+                return ret;
+            ret = newSet();
+            if (quantFormula.quantifier() == Quantifier.MAXSOME || quantFormula.quantifier() == Quantifier.MINSOME) {
+                ret.add(quantFormula);
+            }
+            ret.addAll(quantFormula.decls().accept(this));
+            ret.addAll(quantFormula.formula().accept(this));
+            return cache(quantFormula, ret);
+        }
+    }
 
     private final Options options;
 
@@ -141,7 +171,7 @@ public final class Solver implements KodkodSolver {
             if (translation.trivial())
                 return trivial(translation, endTransl - startTransl);
 
-            final SATSolver cnf = translation.cnf();
+            final SATSolver cnf = getCNF(formula, translation);
 
             options.reporter().solvingCNF(translation.numPrimaryVariables(), cnf.numberOfVariables(), cnf.numberOfClauses());
             final long startSolve = System.currentTimeMillis();
@@ -156,52 +186,41 @@ public final class Solver implements KodkodSolver {
         }
     }
 
-    /**
-     *
-     * @param formula
-     * @param bounds
-     * @param maxDecl
-     * @return
-     * @throws HigherOrderDeclException
-     * @throws UnboundLeafException
-     * @throws AbortedException
-     */
-    public Solution solve(Formula formula, Bounds bounds, Decl maxDecl) throws HigherOrderDeclException, UnboundLeafException, AbortedException {
-        final long startTransl = System.currentTimeMillis();
-
-        try {
-            final Translation.Whole translation = Translator.translate(formula, bounds, options);
-            final long endTransl = System.currentTimeMillis();
-
-            // TODO: a maxsat formula is often UNSAT, will it be simplified to a trivial formula?
-            if (translation.trivial())
-                return trivial(translation, endTransl - startTransl);
-
-            if (!(translation.cnf() instanceof MaxSATSolver)) {
-                throw new UnsupportedOperationException("The solver should be a MaxSAT solver!");
-            }
-            final MaxSATSolver cnf = (MaxSATSolver) translation.cnf();
-            // Add all the primary variables of the corresponding SkolemRelation as soft clauses
-            final IntSet vars = translation.primaryVariables("$" + maxDecl.variable().name());
-            if (vars == null) {
-                throw new IllegalArgumentException("No primary variables for declaration: " + maxDecl.variable().name());
-            }
-            final IntIterator iter = vars.iterator();
-            while (iter.hasNext()) {
-                cnf.addSoftClause(new int[] {iter.next()});
-            }
-
-            options.reporter().solvingCNF(translation.numPrimaryVariables(), cnf.numberOfVariables(), cnf.numberOfClauses());
-            final long startSolve = System.currentTimeMillis();
-            final boolean isSat = cnf.solve();
-            final long endSolve = System.currentTimeMillis();
-
-            final Statistics stats = new Statistics(translation, endTransl - startTransl, endSolve - startSolve);
-            return isSat ? sat(translation, stats) : unsat(translation, stats);
-
-        } catch (SATAbortedException sae) {
-            throw new AbortedException(sae);
+    private SATSolver getCNF(Formula formula, Translation.Whole translation) {
+        final MaximalityQuantifierFinder finder = new MaximalityQuantifierFinder(new HashSet<>());
+        final Set<QuantifiedFormula> quantified = formula.accept(finder);
+        if (quantified.size() == 0) {
+            return translation.cnf();
         }
+        // If contains MAXSOME or MINSOME
+        if (!(translation.cnf() instanceof MaxSATSolver)) {
+            throw new UnsupportedOperationException("The solver should be a MaxSAT solver!");
+        }
+        final MaxSATSolver wcnf = (MaxSATSolver) translation.cnf();
+        // Add all the primary variables of the corresponding SkolemRelation as soft clauses
+        for (QuantifiedFormula q: quantified) {
+            for (Decl decl: q.decls()) {
+                // Get the primary variables by the name of the relation
+                final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
+                if (vars == null) {
+                    throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
+                }
+                final IntIterator iter = vars.iterator();
+                // To reach maximality, let all the primary variables to be true.
+                if (q.quantifier() == Quantifier.MAXSOME) {
+                    while (iter.hasNext()) {
+                        wcnf.addSoftClause(new int[]{iter.next()});
+                    }
+                }
+                // To reach minimality, let all the primary variables to be false.
+                else if (q.quantifier() == Quantifier.MINSOME) {
+                    while (iter.hasNext()) {
+                        wcnf.addSoftClause(new int[] {-iter.next()});
+                    }
+                }
+            }
+        }
+        return wcnf;
     }
 
     /**

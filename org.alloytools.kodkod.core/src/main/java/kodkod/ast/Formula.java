@@ -25,8 +25,7 @@ import static kodkod.ast.operator.FormulaOperator.AND;
 import static kodkod.ast.operator.FormulaOperator.IFF;
 import static kodkod.ast.operator.FormulaOperator.IMPLIES;
 import static kodkod.ast.operator.FormulaOperator.OR;
-import static kodkod.ast.operator.Quantifier.ALL;
-import static kodkod.ast.operator.Quantifier.SOME;
+import static kodkod.ast.operator.Quantifier.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -245,6 +244,32 @@ public abstract class Formula extends Node {
 
     public final Formula forSome(Decls decls, Formula domain) {
         return quantify(SOME, decls, domain);
+    }
+
+    /**
+     *
+     * @param decls
+     * @return
+     */
+    public final Formula forMaxSome(Decls decls) {
+        return quantify(MAXSOME, decls);
+    }
+
+    public final Formula forMaxSome(Decls decls, Formula domain) {
+        return quantify(MAXSOME, decls, domain);
+    }
+
+    /**
+     *
+     * @param decls
+     * @return
+     */
+    public final Formula forMinSome(Decls decls) {
+        return quantify(MINSOME, decls);
+    }
+
+    public final Formula forMinSome(Decls decls, Formula domain) {
+        return quantify(MINSOME, decls, domain);
     }
 
     /**

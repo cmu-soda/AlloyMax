@@ -25,8 +25,7 @@ import static kodkod.ast.operator.FormulaOperator.AND;
 import static kodkod.ast.operator.FormulaOperator.IFF;
 import static kodkod.ast.operator.FormulaOperator.IMPLIES;
 import static kodkod.ast.operator.FormulaOperator.OR;
-import static kodkod.ast.operator.Quantifier.ALL;
-import static kodkod.ast.operator.Quantifier.SOME;
+import static kodkod.ast.operator.Quantifier.*;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -252,10 +251,11 @@ public final class FormulaFlattener extends AbstractVoidVisitor {
 
             final Quantifier quant = qf.quantifier();
 
-            if ((!negated && quant == ALL) || (negated && quant == SOME)) { // may
-                                                                           // break
-                                                                           // down
-                                                                           // further
+            if ((!negated && quant == ALL) ||
+                    (negated && (quant == SOME || quant == MAXSOME || quant == MINSOME))) { // may
+                                                                                            // break
+                                                                                            // down
+                                                                                            // further
                 final Map<Formula,Node> oldConjuncts = conjuncts;
                 conjuncts = new LinkedHashMap<Formula,Node>();
                 qf.formula().accept(this);

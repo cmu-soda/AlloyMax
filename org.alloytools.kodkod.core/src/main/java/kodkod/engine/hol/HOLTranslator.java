@@ -274,7 +274,7 @@ public class HOLTranslator implements ReturnVisitor<Expression,Proc,Decls,IntExp
     }
 
     private void assertNotSkolemizable(QuantifiedFormula qf) {
-        if (qf.quantifier() == Quantifier.SOME) {
+        if (qf.quantifier() == Quantifier.SOME || qf.quantifier() == Quantifier.MAXSOME || qf.quantifier() == Quantifier.MINSOME) {
             String msg = "It appears that the existential quantifier in '" + qf + "' is skolemizable, but it hasn't been";
             throw new IllegalStateException(msg);
         }

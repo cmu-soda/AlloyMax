@@ -41,6 +41,20 @@ public enum Quantifier {
                             public String toString() {
                                 return "some";
                             }
+                        },
+                        /** Existential quantifier with maximality. */
+                        MAXSOME {
+                            @Override
+                            public String toString() {
+                                return "maxsome";
+                            }
+                        },
+                        /** Existential quantifier with minimality. */
+                        MINSOME {
+                            @Override
+                            public String toString() {
+                                return "minsome";
+                            }
                         };
 
     public Quantifier opposite;
@@ -54,5 +68,12 @@ public enum Quantifier {
         SOME.opposite = ALL;
         SOME.universal = false;
         SOME.existential = true;
+        // The semantics for MAXSOME and MINSOME is the same as SOME.
+        MAXSOME.opposite = ALL;
+        MAXSOME.universal = false;
+        MAXSOME.existential = true;
+        MINSOME.opposite = ALL;
+        MINSOME.universal = false;
+        MINSOME.existential = true;
     }
 }

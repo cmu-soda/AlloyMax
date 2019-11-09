@@ -205,7 +205,7 @@ public final class GradeSysTest3 {
         Expression x49=x46.join(x13);
         Formula x47=x48.in(x49);
         Formula x44=x47.forAll(x45);
-        Formula x41=x44.forSome(x42);
+        Formula x41=x44.forMaxSome(x42);
         Formula x50=x0.eq(x0);
         Formula x51=x1.eq(x1);
         Formula x52=x2.eq(x2);

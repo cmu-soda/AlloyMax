@@ -257,7 +257,7 @@ public final class GradeSysTest5 {
         Expression x72=x66.join(x15);
         Formula x69=x70.in(x72);
         Formula x63=x69.forAll(x64);
-        Formula x57=x63.forSome(x58);
+        Formula x57=x63.forMaxSome(x58);
         Formula x73=x0.eq(x0);
         Formula x74=x1.eq(x1);
         Formula x75=x2.eq(x2);
@@ -277,7 +277,8 @@ public final class GradeSysTest5 {
         Formula x16=Formula.compose(FormulaOperator.AND, x17, x19, x22, x24, x26, x28, x39, x44, x52, x57, x73, x74, x75, x76, x77, x78, x79, x80, x81, x82, x83, x84, x85, x86, x87, x88);
 
         Solver solver = new Solver();
-        solver.options().setSolver(SATFactory.DefaultSAT4J);
+//        solver.options().setSolver(SATFactory.DefaultSAT4J);
+        solver.options().setSolver(SATFactory.DefaultSAT4JMax);
         solver.options().setBitwidth(4);
 //        solver.options().setFlatten(false);
         solver.options().setIntEncoding(Options.IntEncoding.TWOSCOMPLEMENT);
