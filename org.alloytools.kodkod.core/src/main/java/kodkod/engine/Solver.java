@@ -21,24 +21,18 @@
  */
 package kodkod.engine;
 
-import kodkod.ast.*;
-import kodkod.ast.operator.Quantifier;
-import kodkod.ast.visitor.AbstractCollector;
+import kodkod.ast.Formula;
+import kodkod.ast.IntExpression;
+import kodkod.ast.Relation;
 import kodkod.engine.config.Options;
 import kodkod.engine.fol2sat.*;
-import kodkod.engine.satlab.MaxSATSolver;
 import kodkod.engine.satlab.SATAbortedException;
 import kodkod.engine.satlab.SATProver;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
-import kodkod.util.ints.IntIterator;
-import kodkod.util.ints.IntSet;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * A computational engine for solving relational satisfiability problems. Such a
@@ -63,35 +57,6 @@ import java.util.Set;
  * @author Emina Torlak
  */
 public final class Solver implements KodkodSolver {
-
-    /**
-     * @author Changjian Zhang
-     */
-    private static class MaximalityQuantifierFinder extends AbstractCollector<QuantifiedFormula> {
-
-        protected MaximalityQuantifierFinder(Set<Node> cached) {
-            super(cached);
-        }
-
-        @Override
-        protected Set<QuantifiedFormula> newSet() {
-            return new LinkedHashSet<>();
-        }
-
-        @Override
-        public Set<QuantifiedFormula> visit(QuantifiedFormula quantFormula) {
-            Set<QuantifiedFormula> ret = lookup(quantFormula);
-            if (ret != null)
-                return ret;
-            ret = newSet();
-            if (quantFormula.quantifier() == Quantifier.MAXSOME || quantFormula.quantifier() == Quantifier.MINSOME) {
-                ret.add(quantFormula);
-            }
-            ret.addAll(quantFormula.decls().accept(this));
-            ret.addAll(quantFormula.formula().accept(this));
-            return cache(quantFormula, ret);
-        }
-    }
 
     private final Options options;
 
@@ -171,7 +136,7 @@ public final class Solver implements KodkodSolver {
             if (translation.trivial())
                 return trivial(translation, endTransl - startTransl);
 
-            final SATSolver cnf = getCNF(formula, translation);
+            final SATSolver cnf = translation.cnf();
 
             options.reporter().solvingCNF(translation.numPrimaryVariables(), cnf.numberOfVariables(), cnf.numberOfClauses());
             final long startSolve = System.currentTimeMillis();
@@ -184,44 +149,6 @@ public final class Solver implements KodkodSolver {
         } catch (SATAbortedException sae) {
             throw new AbortedException(sae);
         }
-    }
-
-    private SATSolver getCNF(Formula formula, Translation.Whole translation) {
-        final MaximalityQuantifierFinder finder = new MaximalityQuantifierFinder(new HashSet<>());
-        final Set<QuantifiedFormula> quantified = formula.accept(finder);
-        if (quantified.size() == 0) {
-            return translation.cnf();
-        }
-        // If contains MAXSOME or MINSOME
-        if (!(translation.cnf() instanceof MaxSATSolver)) {
-            throw new UnsupportedOperationException("The solver should be a MaxSAT solver!");
-        }
-        final MaxSATSolver wcnf = (MaxSATSolver) translation.cnf();
-        // Add all the primary variables of the corresponding SkolemRelation as soft clauses
-        for (QuantifiedFormula q: quantified) {
-            for (Decl decl: q.decls()) {
-                // Get the primary variables by the name of the relation
-                final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
-                if (vars == null) {
-                    // This is probably caused by the use of MAXSOME or MINSOME quantifier in set comprehension.
-                    throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
-                }
-                final IntIterator iter = vars.iterator();
-                // To reach maximality, let all the primary variables to be true.
-                if (q.quantifier() == Quantifier.MAXSOME) {
-                    while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[]{iter.next()});
-                    }
-                }
-                // To reach minimality, let all the primary variables to be false.
-                else if (q.quantifier() == Quantifier.MINSOME) {
-                    while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[] {-iter.next()});
-                    }
-                }
-            }
-        }
-        return wcnf;
     }
 
     /**

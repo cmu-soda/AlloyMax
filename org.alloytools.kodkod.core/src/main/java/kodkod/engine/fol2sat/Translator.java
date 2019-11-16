@@ -21,44 +21,31 @@
  */
 package kodkod.engine.fol2sat;
 
-import static kodkod.engine.fol2sat.FormulaFlattener.flatten;
-import static kodkod.engine.fol2sat.Skolemizer.skolemize;
-import static kodkod.util.collections.Containers.setDifference;
-import static kodkod.util.nodes.AnnotatedNode.annotate;
-import static kodkod.util.nodes.AnnotatedNode.annotateRoots;
-
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
-import kodkod.ast.Expression;
-import kodkod.ast.Formula;
-import kodkod.ast.IntExpression;
-import kodkod.ast.Node;
-import kodkod.ast.Relation;
-import kodkod.ast.RelationPredicate;
+import kodkod.ast.*;
+import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.AbstractReplacer;
-import kodkod.engine.bool.BooleanAccumulator;
-import kodkod.engine.bool.BooleanConstant;
-import kodkod.engine.bool.BooleanFactory;
-import kodkod.engine.bool.BooleanFormula;
-import kodkod.engine.bool.BooleanMatrix;
-import kodkod.engine.bool.BooleanValue;
-import kodkod.engine.bool.Int;
-import kodkod.engine.bool.Operator;
+import kodkod.engine.bool.*;
 import kodkod.engine.config.Options;
 import kodkod.engine.hol.HOLTranslation;
 import kodkod.engine.hol.HOLTranslator;
 import kodkod.engine.hol.Proc;
+import kodkod.engine.satlab.MaxSATSolver;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
 import kodkod.instance.TupleSet;
 import kodkod.util.ints.IndexedEntry;
+import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
 import kodkod.util.nodes.AnnotatedNode;
+
+import java.util.*;
+
+import static kodkod.engine.fol2sat.FormulaFlattener.flatten;
+import static kodkod.engine.fol2sat.Skolemizer.skolemize;
+import static kodkod.util.collections.Containers.setDifference;
+import static kodkod.util.nodes.AnnotatedNode.annotate;
+import static kodkod.util.nodes.AnnotatedNode.annotateRoots;
 
 /**
  * Translates, evaluates, and approximates {@link Node nodes} with respect to
@@ -182,7 +169,53 @@ public final class Translator {
      *             but options.skolemize is false.
      */
     public static Translation.Whole translate(Formula formula, Bounds bounds, Options options) {
-        return (Translation.Whole) (new Translator(formula, bounds, options)).translate();
+        Translation.Whole translation = (Translation.Whole) (new Translator(formula, bounds, options)).translate();
+        appendMaxSatSoftClauses(translation, formula);
+        return translation;
+    }
+
+    /**
+     * TODO
+     * @param translation
+     * @param formula
+     *
+     * @author Changjian Zhang
+     */
+    private static void appendMaxSatSoftClauses(Translation.Whole translation, Formula formula) {
+        final MaximalityQuantifierFinder finder = new MaximalityQuantifierFinder(new HashSet<>());
+        final Set<QuantifiedFormula> quantified = formula.accept(finder);
+        if (quantified.size() == 0) {
+            return;
+        }
+        // If contains MAXSOME or MINSOME
+        if (!(translation.cnf() instanceof MaxSATSolver)) {
+            throw new IllegalArgumentException("The solver should be a MaxSAT solver!");
+        }
+        final MaxSATSolver wcnf = (MaxSATSolver) translation.cnf();
+        // Add all the primary variables of the corresponding SkolemRelation as soft clauses
+        for (QuantifiedFormula q: quantified) {
+            for (Decl decl: q.decls()) {
+                // Get the primary variables by the name of the relation
+                final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
+                if (vars == null) {
+                    // This is probably caused by the use of MAXSOME or MINSOME quantifier in set comprehension.
+                    throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
+                }
+                final IntIterator iter = vars.iterator();
+                // To reach maximality, let all the primary variables to be true.
+                if (q.quantifier() == Quantifier.MAXSOME) {
+                    while (iter.hasNext()) {
+                        wcnf.addSoftClause(new int[]{iter.next()});
+                    }
+                }
+                // To reach minimality, let all the primary variables to be false.
+                else if (q.quantifier() == Quantifier.MINSOME) {
+                    while (iter.hasNext()) {
+                        wcnf.addSoftClause(new int[] {-iter.next()});
+                    }
+                }
+            }
+        }
     }
 
     /**
