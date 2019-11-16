@@ -1013,7 +1013,7 @@ public final class SimInstance extends VisitReturn<Object> {
             return enumerate(null, 0, x, x.sub.not(), 0) == 0;
         if (x.op == ExprQt.Op.NO)
             return enumerate(null, 0, x, x.sub, 0) == 0;
-        if (x.op == ExprQt.Op.SOME)
+        if (x.op == ExprQt.Op.SOME || x.op == ExprQt.Op.MAXSOME || x.op == ExprQt.Op.MINSOME)
             return enumerate(null, 0, x, x.sub, 0) >= 1;
         if (x.op == ExprQt.Op.LONE)
             return enumerate(null, 0, x, x.sub, 0) <= 1;

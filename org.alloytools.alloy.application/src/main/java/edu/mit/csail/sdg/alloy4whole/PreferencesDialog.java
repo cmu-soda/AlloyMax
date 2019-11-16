@@ -292,6 +292,13 @@ public class PreferencesDialog extends JFrame {
             log.logDivider();
             log.flush();
         }
+        if (satChoices.contains(SatSolver.SAT4JMax)) {
+            log.logBold("MaxSat is enabled! The default MaxSat solver is SAT4JMax.\n");
+            log.log("When key word 'maxsome' or 'minsome' is used, the solver must\n" +
+                    "be set to MaxSat.\n");
+            log.logDivider();
+            log.flush();
+        }
         return satChoices;
     }
 

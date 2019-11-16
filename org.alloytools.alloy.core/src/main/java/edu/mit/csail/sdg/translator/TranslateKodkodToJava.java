@@ -814,6 +814,12 @@ public final class TranslateKodkodToJava implements VoidVisitor {
             case SOME :
                 file.printf("Formula %s=%s.forSome(%s);%n", newname, f, d);
                 break;
+            case MAXSOME :
+                file.printf("Formula %s=%s.forMaxSome(%s);%n", newname, f, d);
+                break;
+            case MINSOME :
+                file.printf("Formula %s=%s.forMinSome(%s);%n", newname, f, d);
+                break;
             default :
                 throw new RuntimeException("Unknown kodkod quantifier \"" + x.quantifier() + "\" encountered");
         }

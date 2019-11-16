@@ -468,6 +468,8 @@ terminal Pos SIGINT;           //  Int
 terminal Pos SLASH;            //  /
 terminal Pos SOME2;            //  some      // The filter enables us to disambiguate
 terminal Pos SOME;             //  some      // The filter enables us to disambiguate
+terminal Pos MAXSOME;          //  maxsome
+terminal Pos MINSOME;          //  minsome
 terminal Pos STAR;             //  *
 terminal Pos STRING;           //  String
 terminal Pos SUM2;             //  sum       // The filter enables us to disambiguate
@@ -822,6 +824,8 @@ Bind ::= LET     Let:x                {: RESULT = x;                            
 Bind ::= ALL2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ALL .make(o, null, a, b); :};
 Bind ::= NO2:o   Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.NO  .make(o, null, a, b); :};
 Bind ::= SOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SOME.make(o, null, a, b); :};
+Bind ::= MAXSOME:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MAXSOME.make(o, null, a, b); :};
+Bind ::= MINSOME:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MINSOME.make(o, null, a, b); :};
 Bind ::= LONE2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.LONE.make(o, null, a, b); :};
 Bind ::= ONE2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ONE .make(o, null, a, b); :};
 Bind ::= SUM2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SUM .make(o, null, a, b); :};

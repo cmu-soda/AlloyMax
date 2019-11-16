@@ -177,6 +177,10 @@ public final class ExprQt extends Expr {
                     ONE("one"),
                     /** some a,b:x | formula */
                     SOME("some"),
+                    /** maxsome ab:x | formula */
+                    MAXSOME("maxsome"),
+                    /** maxsome ab:x | formula */
+                    MINSOME("minsome"),
                     /** sum a,b:x | intExpression */
                     SUM("sum"),
                     /** { a,b:x | formula } */

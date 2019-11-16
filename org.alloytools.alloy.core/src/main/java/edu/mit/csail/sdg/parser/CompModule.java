@@ -536,7 +536,7 @@ public final class CompModule extends Browsable implements Module {
                 }
                 // Below is a special case to allow more fine-grained
                 // typechecking when we see "all x:field$" or "some x:field$"
-                boolean some = (x.op == ExprQt.Op.SOME), compre = (x.op == ExprQt.Op.COMPREHENSION);
+                boolean some = (x.op == ExprQt.Op.SOME || x.op == ExprQt.Op.MAXSOME || x.op == ExprQt.Op.MINSOME), compre = (x.op == ExprQt.Op.COMPREHENSION);
                 if (x.decls.size() == 1 && d.names.size() == 1 && isOneOf(exp) && (x.op == ExprQt.Op.ALL || some || compre) && (isMetaSig || isMetaField)) {
                     ExprVar v = (ExprVar) (d.names.get(0));
                     // Prevent warnings

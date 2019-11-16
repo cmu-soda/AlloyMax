@@ -1527,6 +1527,16 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
                 return ans.forSome(dd);
             guards.add(ans);
             return Formula.and(guards).forSome(dd);
+        } else if (op == ExprQt.Op.MAXSOME) {
+            if (guards.size() == 0)
+                return ans.forMaxSome(dd);
+            guards.add(ans);
+            return Formula.and(guards).forMaxSome(dd);
+        } else if (op == ExprQt.Op.MINSOME) {
+            if (guards.size() == 0)
+                return ans.forMinSome(dd);
+            guards.add(ans);
+            return Formula.and(guards).forMinSome(dd);
         } else {
             if (guards.size() == 0)
                 return ans.forAll(dd);
