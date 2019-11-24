@@ -162,6 +162,10 @@ public final class ExprUnary extends Expr {
                     NO("no"),
                     /** some x (where x is a set or relation) */
                     SOME("some"),
+                    /** maxsome x (where x is a set or relation) */
+                    MAXSOME("maxsome"),
+                    /** minsome x (where x is a set or relation) */
+                    MINSOME("minsome"),
                     /** lone x (where x is a set or relation) */
                     LONE("lone"),
                     /** one x (where x is a set or relation) */
@@ -296,6 +300,8 @@ public final class ExprUnary extends Expr {
                     case NOT :
                     case NO :
                     case SOME :
+                    case MAXSOME :
+                    case MINSOME :
                     case LONE :
                     case ONE :
                         type = Type.FORMULA;
@@ -372,6 +378,8 @@ public final class ExprUnary extends Expr {
             case NO :
             case ONE :
             case SOME :
+            case MAXSOME :
+            case MINSOME :
             case LONE :
                 s = Type.removesBoolAndInt(sub.type);
                 break;

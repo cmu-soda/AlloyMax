@@ -839,6 +839,8 @@ public final class SimInstance extends VisitReturn<Object> {
             case ONE :
                 return cset(x.sub).longsize() == 1;
             case SOME :
+            case MAXSOME :
+            case MINSOME :
                 return cset(x.sub).longsize() >= 1;
             case NOT :
                 return cform(x.sub) ? Boolean.FALSE : Boolean.TRUE;
@@ -1297,7 +1299,7 @@ public final class SimInstance extends VisitReturn<Object> {
                                     ExprBinary b = (ExprBinary) f;
                                     if (b.op == ExprBinary.Op.JOIN && b.left.isSame(s.decl.get()) && b.right.deNOP() instanceof Field) {
                                         String n = ((Field) (b.right.deNOP())).label;
-                                        if (u.op == ExprUnary.Op.SOME)
+                                        if (u.op == ExprUnary.Op.SOME || u.op == ExprUnary.Op.MAXSOME || u.op == ExprUnary.Op.MINSOME)
                                             return "The " + n + " cannot be empty.";
                                         if (u.op == ExprUnary.Op.LONE)
                                             return "The " + n + " cannot have more than one value.";

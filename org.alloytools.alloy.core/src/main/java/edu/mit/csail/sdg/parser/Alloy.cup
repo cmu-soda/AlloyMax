@@ -20,7 +20,7 @@
  * parse the transformed token stream using this LALR(1) grammar.  For more information,
  * please refer to CompFilter.java
  */
- 
+
 package edu.mit.csail.sdg.parser;
 
 import java.util.Stack;
@@ -213,6 +213,10 @@ parser code {:
     ch.put(CompSym.SLASH, "/");
     ch.put(CompSym.SOME2, "some");
     ch.put(CompSym.SOME, "some");
+    ch.put(CompSym.MAXSOME, "maxsome");
+    ch.put(CompSym.MAXSOME2, "maxsome");
+    ch.put(CompSym.MINSOME, "minsome");
+    ch.put(CompSym.MINSOME2, "minsome");
     ch.put(CompSym.STAR, "*");
     ch.put(CompSym.STRING, "String");
     ch.put(CompSym.SUM2, "sum");
@@ -468,8 +472,10 @@ terminal Pos SIGINT;           //  Int
 terminal Pos SLASH;            //  /
 terminal Pos SOME2;            //  some      // The filter enables us to disambiguate
 terminal Pos SOME;             //  some      // The filter enables us to disambiguate
-terminal Pos MAXSOME;          //  maxsome
-terminal Pos MINSOME;          //  minsome
+terminal Pos MAXSOME2;         //  maxsome for quantifier
+terminal Pos MAXSOME;          //  maxsome for multiplicity
+terminal Pos MINSOME2;         //  minsome for quantifier
+terminal Pos MINSOME;          //  minsome for multiplicity
 terminal Pos STAR;             //  *
 terminal Pos STRING;           //  String
 terminal Pos SUM2;             //  sum       // The filter enables us to disambiguate
@@ -621,14 +627,14 @@ Typescope  ::= TypeNumber:a Name:b  {:
 :};
 
 //[AM]: INT -> SIGINT
-Typescope ::= TypeNumber:a SIGINT:b  {: 
+Typescope ::= TypeNumber:a SIGINT:b  {:
    Pos p = a.pos.merge(b);
    if (a.endingScope>a.startingScope) throw new ErrorSyntax(p, "Cannot specify a growing scope for \"Int\"");
    if (a.isExact) throw new ErrorSyntax(p, "The exactly keyword is redundant here since the integer bitwidth must be exact.");
    RESULT = new CommandScope(p, new PrimSig("int", AttrType.WHERE.make(p)), a.isExact, a.startingScope, a.startingScope, 1);
 :};
 
-Typescope ::= TypeNumber:a INT:b  {: 
+Typescope ::= TypeNumber:a INT:b  {:
    Pos p = a.pos.merge(b);
    if (a.endingScope>a.startingScope) throw new ErrorSyntax(p, "Cannot specify a growing scope for \"Int\"");
    if (a.isExact) throw new ErrorSyntax(p, "The exactly keyword is redundant here since the integer bitwidth must be exact.");
@@ -824,8 +830,8 @@ Bind ::= LET     Let:x                {: RESULT = x;                            
 Bind ::= ALL2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ALL .make(o, null, a, b); :};
 Bind ::= NO2:o   Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.NO  .make(o, null, a, b); :};
 Bind ::= SOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SOME.make(o, null, a, b); :};
-Bind ::= MAXSOME:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MAXSOME.make(o, null, a, b); :};
-Bind ::= MINSOME:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MINSOME.make(o, null, a, b); :};
+Bind ::= MAXSOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MAXSOME.make(o, null, a, b); :};
+Bind ::= MINSOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MINSOME.make(o, null, a, b); :};
 Bind ::= LONE2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.LONE.make(o, null, a, b); :};
 Bind ::= ONE2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ONE .make(o, null, a, b); :};
 Bind ::= SUM2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SUM .make(o, null, a, b); :};
@@ -883,6 +889,8 @@ CompareExprA ::= CompareExprB:a NOTGTE:o    ShiftExprA:b    {: RESULT=ExprBinary
 CompareExprA ::= ALL:o  ShiftExprA                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprA ::= NO:o   ShiftExprA:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
 CompareExprA ::= SOME:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
+CompareExprA ::= MAXSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
+CompareExprA ::= MINSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
 CompareExprA ::= LONE:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprA ::= ONE:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprA ::= SET:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};
@@ -904,6 +912,8 @@ CompareExprB ::= CompareExprB:a NOTGTE:o    ShiftExprB:b    {: RESULT=ExprBinary
 CompareExprB ::= ALL:o  ShiftExprB                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprB ::= NO:o   ShiftExprB:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
 CompareExprB ::= SOME:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
+CompareExprB ::= MAXSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
+CompareExprB ::= MINSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
 CompareExprB ::= LONE:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprB ::= ONE:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprB ::= SET:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};

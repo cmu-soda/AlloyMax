@@ -15,84 +15,6 @@
 
 package edu.mit.csail.sdg.parser;
 
-import static edu.mit.csail.sdg.parser.CompSym.ALL;
-import static edu.mit.csail.sdg.parser.CompSym.ALL2;
-import static edu.mit.csail.sdg.parser.CompSym.ANY_ARROW_LONE;
-import static edu.mit.csail.sdg.parser.CompSym.ANY_ARROW_ONE;
-import static edu.mit.csail.sdg.parser.CompSym.ANY_ARROW_SOME;
-import static edu.mit.csail.sdg.parser.CompSym.ARROW;
-import static edu.mit.csail.sdg.parser.CompSym.CHECK;
-import static edu.mit.csail.sdg.parser.CompSym.COLON;
-import static edu.mit.csail.sdg.parser.CompSym.COMMA;
-import static edu.mit.csail.sdg.parser.CompSym.DISJ;
-import static edu.mit.csail.sdg.parser.CompSym.EOF;
-import static edu.mit.csail.sdg.parser.CompSym.EQUALS;
-import static edu.mit.csail.sdg.parser.CompSym.EXH;
-import static edu.mit.csail.sdg.parser.CompSym.FUN;
-import static edu.mit.csail.sdg.parser.CompSym.GT;
-import static edu.mit.csail.sdg.parser.CompSym.GTE;
-import static edu.mit.csail.sdg.parser.CompSym.ID;
-import static edu.mit.csail.sdg.parser.CompSym.IDEN;
-import static edu.mit.csail.sdg.parser.CompSym.IN;
-import static edu.mit.csail.sdg.parser.CompSym.INT;
-import static edu.mit.csail.sdg.parser.CompSym.INTADD;
-import static edu.mit.csail.sdg.parser.CompSym.INTDIV;
-import static edu.mit.csail.sdg.parser.CompSym.INTMAX;
-import static edu.mit.csail.sdg.parser.CompSym.INTMIN;
-import static edu.mit.csail.sdg.parser.CompSym.INTMUL;
-import static edu.mit.csail.sdg.parser.CompSym.INTNEXT;
-import static edu.mit.csail.sdg.parser.CompSym.INTREM;
-import static edu.mit.csail.sdg.parser.CompSym.INTSUB;
-import static edu.mit.csail.sdg.parser.CompSym.LBRACE;
-import static edu.mit.csail.sdg.parser.CompSym.LONE;
-import static edu.mit.csail.sdg.parser.CompSym.LONE2;
-import static edu.mit.csail.sdg.parser.CompSym.LONE_ARROW_ANY;
-import static edu.mit.csail.sdg.parser.CompSym.LONE_ARROW_LONE;
-import static edu.mit.csail.sdg.parser.CompSym.LONE_ARROW_ONE;
-import static edu.mit.csail.sdg.parser.CompSym.LONE_ARROW_SOME;
-import static edu.mit.csail.sdg.parser.CompSym.LT;
-import static edu.mit.csail.sdg.parser.CompSym.LTE;
-import static edu.mit.csail.sdg.parser.CompSym.MINUS;
-import static edu.mit.csail.sdg.parser.CompSym.NO;
-import static edu.mit.csail.sdg.parser.CompSym.NO2;
-import static edu.mit.csail.sdg.parser.CompSym.NONE;
-import static edu.mit.csail.sdg.parser.CompSym.NOT;
-import static edu.mit.csail.sdg.parser.CompSym.NOTEQUALS;
-import static edu.mit.csail.sdg.parser.CompSym.NOTGT;
-import static edu.mit.csail.sdg.parser.CompSym.NOTGTE;
-import static edu.mit.csail.sdg.parser.CompSym.NOTIN;
-import static edu.mit.csail.sdg.parser.CompSym.NOTLT;
-import static edu.mit.csail.sdg.parser.CompSym.NOTLTE;
-import static edu.mit.csail.sdg.parser.CompSym.NUMBER;
-import static edu.mit.csail.sdg.parser.CompSym.ONE;
-import static edu.mit.csail.sdg.parser.CompSym.ONE2;
-import static edu.mit.csail.sdg.parser.CompSym.ONE_ARROW_ANY;
-import static edu.mit.csail.sdg.parser.CompSym.ONE_ARROW_LONE;
-import static edu.mit.csail.sdg.parser.CompSym.ONE_ARROW_ONE;
-import static edu.mit.csail.sdg.parser.CompSym.ONE_ARROW_SOME;
-import static edu.mit.csail.sdg.parser.CompSym.PART;
-import static edu.mit.csail.sdg.parser.CompSym.PRED;
-import static edu.mit.csail.sdg.parser.CompSym.PRIVATE;
-import static edu.mit.csail.sdg.parser.CompSym.RBRACE;
-import static edu.mit.csail.sdg.parser.CompSym.RBRACKET;
-import static edu.mit.csail.sdg.parser.CompSym.RPAREN;
-import static edu.mit.csail.sdg.parser.CompSym.RUN;
-import static edu.mit.csail.sdg.parser.CompSym.SET;
-import static edu.mit.csail.sdg.parser.CompSym.SIGINT;
-import static edu.mit.csail.sdg.parser.CompSym.SLASH;
-import static edu.mit.csail.sdg.parser.CompSym.SOME;
-import static edu.mit.csail.sdg.parser.CompSym.SOME2;
-import static edu.mit.csail.sdg.parser.CompSym.SOME_ARROW_ANY;
-import static edu.mit.csail.sdg.parser.CompSym.SOME_ARROW_LONE;
-import static edu.mit.csail.sdg.parser.CompSym.SOME_ARROW_ONE;
-import static edu.mit.csail.sdg.parser.CompSym.SOME_ARROW_SOME;
-import static edu.mit.csail.sdg.parser.CompSym.STR;
-import static edu.mit.csail.sdg.parser.CompSym.SUM;
-import static edu.mit.csail.sdg.parser.CompSym.SUM2;
-import static edu.mit.csail.sdg.parser.CompSym.THIS;
-import static edu.mit.csail.sdg.parser.CompSym.TOTALORDER;
-import static edu.mit.csail.sdg.parser.CompSym.UNIV;
-
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -104,6 +26,8 @@ import edu.mit.csail.sdg.ast.ExprConstant;
 import edu.mit.csail.sdg.ast.ExprVar;
 import java_cup.runtime.Scanner;
 import java_cup.runtime.Symbol;
+
+import static edu.mit.csail.sdg.parser.CompSym.*;
 
 /**
  * This class sits between the lexer and the parser.
@@ -185,6 +109,10 @@ final class CompFilter implements Scanner {
                 c = ONE2;
             else if (a.sym == SOME)
                 c = SOME2;
+            else if (a.sym == MAXSOME)
+                c = MAXSOME2;
+            else if (a.sym == MINSOME)
+                c = MINSOME2;
             else
                 return last = a;
             final ArrayList<Symbol> temp = new ArrayList<Symbol>();

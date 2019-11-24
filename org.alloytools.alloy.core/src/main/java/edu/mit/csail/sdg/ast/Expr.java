@@ -1079,6 +1079,24 @@ public abstract class Expr extends Browsable {
     }
 
     /**
+     * Returns the formula (maxsome this)
+     * <p>
+     * this must be a set or a relation
+     */
+    public final Expr maxsome() {
+        return ExprUnary.Op.MAXSOME.make(span(), this);
+    }
+
+    /**
+     * Returns the formula (minsome this)
+     * <p>
+     * this must be a set or a relation
+     */
+    public final Expr minsome() {
+        return ExprUnary.Op.MINSOME.make(span(), this);
+    }
+
+    /**
      * Returns the formula (lone this)
      * <p>
      * this must be a set or a relation
