@@ -187,6 +187,8 @@ public final class A4Options implements Serializable {
         public static final SatSolver SAT4JMax         = new SatSolver("sat4jmax", "SAT4JMax", null, null, true);
         /** Outputs the raw CNF file only */
         public static final SatSolver CNF              = new SatSolver("cnf", "Output CNF to file", null, null, true);
+        /** Outputs the raw WCNF file only */
+        public static final SatSolver WCNF             = new SatSolver("wcnf", "Output WCNF to file", null, null, true);
         /** Outputs the raw Kodkod file only */
         public static final SatSolver KK               = new SatSolver("kodkod", "Output Kodkod to file", null, null, true);
 

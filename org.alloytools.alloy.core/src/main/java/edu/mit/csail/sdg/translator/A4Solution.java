@@ -1378,9 +1378,10 @@ public final class A4Solution {
                     rep.solve(primaryVars, vars, clauses);
             }
         });
-        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.KK) && tryBookExamples) { // try
-                                                                                                       // book
-                                                                                                       // examples
+        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.WCNF)
+                && !opt.solver.equals(SatSolver.KK) && tryBookExamples) { // try
+                                                                          // book
+                                                                          // examples
             A4Reporter r = AlloyCore.isDebug() ? rep : null;
             try {
                 sol = BookExamples.trial(r, this, fgoal, solver, cmd.check);
@@ -1402,10 +1403,15 @@ public final class A4Solution {
             rep.resultCNF(out);
             return null;
         }
-        if (opt.solver.equals(SatSolver.CNF)) {
-            File tmpCNF = File.createTempFile("tmp", ".cnf", new File(opt.tempDirectory));
+        if (opt.solver.equals(SatSolver.CNF) || opt.solver.equals(SatSolver.WCNF)) {
+            File tmpCNF = opt.solver.equals(SatSolver.CNF) ?
+                    File.createTempFile("tmp", ".cnf", new File(opt.tempDirectory)) :
+                    File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
             String out = tmpCNF.getAbsolutePath();
-            solver.options().setSolver(WriteCNF.factory(out));
+            if (opt.solver.equals(SatSolver.CNF))
+                solver.options().setSolver(WriteCNF.factory(out));
+            else
+                solver.options().setSolver(WriteWCNF.factory(out));
             try {
                 sol = solver.solve(fgoal, bounds);
             } catch (WriteCNF.WriteCNFCompleted ex) {
