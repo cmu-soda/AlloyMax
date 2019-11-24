@@ -69,6 +69,24 @@ public enum Multiplicity {
                               }
                           },
                           /**
+                           * <tt>maxsome expr</tt>: expr contains the most possible elements.
+                           */
+                          MAXSOME {
+                              @Override
+                              public String toString() {
+                                  return "maxsome";
+                              }
+                          },
+                          /**
+                            * <tt>minsome expr</tt>: expr contains the least possible elements.
+                            */
+                          MINSOME {
+                              @Override
+                              public String toString() {
+                                  return "minsome";
+                              }
+                          },
+                          /**
                            * <tt>v: set expr</tt>: v is a subset of expr. The 'set' multiplicity can only
                            * be used in a declaration.
                            */

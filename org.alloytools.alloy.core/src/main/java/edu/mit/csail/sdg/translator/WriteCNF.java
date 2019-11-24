@@ -27,7 +27,7 @@ import kodkod.engine.satlab.SATSolver;
  * an exception (this code is adapted from ExternalSolver from Kodkod).
  */
 
-final class WriteCNF implements SATSolver {
+class WriteCNF implements SATSolver {
 
     /**
      * This runtime exception is thrown when the CNF file has been written
@@ -45,27 +45,27 @@ final class WriteCNF implements SATSolver {
     }
 
     /** This is the CNF file we are generating. */
-    private final RandomAccessFile cnf;
+    protected final RandomAccessFile cnf;
 
     /**
      * This buffers up the clauses we are writing to the CNF file, to avoid
      * excessive I/O.
      */
-    private final StringBuilder    buffer;
+    protected final StringBuilder    buffer;
 
     /** This is the buffer size. */
-    private static final int       capacity = 8192;
+    protected static final int       capacity = 8192;
 
     /** The number of variables so far. */
-    private int                    vars     = 0;
+    protected int                    vars     = 0;
 
     /** The number of clauses so far. */
-    private int                    clauses  = 0;
+    protected int                    clauses  = 0;
 
     /**
      * Helper method that returns a factory for WriteCNF instances.
      */
-    public static final SATFactory factory(final String filename) {
+    public static SATFactory factory(final String filename) {
         return new SATFactory() {
 
             /** {@inheritDoc} */
@@ -86,12 +86,12 @@ final class WriteCNF implements SATSolver {
      * Constructs a WriteCNF solver that will write CNF into the given file, without
      * solving it.
      */
-    private WriteCNF(String filename) {
+    protected WriteCNF(String filename) {
         try {
             this.cnf = new RandomAccessFile(filename, "rw");
             this.cnf.setLength(0);
             this.buffer = new StringBuilder(capacity);
-            for (int i = String.valueOf(Integer.MAX_VALUE).length() * 2 + 8; i > 0; i--) {
+            for (int i = String.valueOf(Integer.MAX_VALUE).length() * 3 + 9; i > 0; i--) {
                 // get enough space into the buffer for the cnf header, which
                 // will be written last
                 buffer.append(' ');
@@ -103,7 +103,7 @@ final class WriteCNF implements SATSolver {
     }
 
     /** Helper method that flushes the buffer. */
-    private void flush() {
+    protected void flush() {
         try {
             cnf.writeBytes(buffer.toString());
             buffer.setLength(0);

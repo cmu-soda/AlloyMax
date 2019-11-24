@@ -926,6 +926,8 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 ret = child.none(env);
                 break;
             case SOME :
+            case MAXSOME :
+            case MINSOME :  // FIXME: Might have problem for MINSOME
                 ret = child.some(env);
                 break;
             case ONE :

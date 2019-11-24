@@ -22,6 +22,7 @@
 package kodkod.engine.fol2sat;
 
 import kodkod.ast.*;
+import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.AbstractReplacer;
 import kodkod.engine.bool.*;
@@ -182,9 +183,13 @@ public final class Translator {
      * @author Changjian Zhang
      */
     private static void appendMaxSatSoftClauses(Translation.Whole translation, Formula formula) {
-        final MaximalityQuantifierFinder finder = new MaximalityQuantifierFinder(new HashSet<>());
-        final Set<QuantifiedFormula> quantified = formula.accept(finder);
-        if (quantified.size() == 0) {
+        final MaximalityQuantifierFinder quantFinder = new MaximalityQuantifierFinder(new HashSet<>());
+        final Set<QuantifiedFormula> quantified = formula.accept(quantFinder);
+        final MaximalityMultifierFinder multFinder = new MaximalityMultifierFinder(new HashSet<>());
+        final Set<MultiplicityFormula> mults = formula.accept(multFinder);
+
+        // No maxsome or minsome are used in the formula
+        if (quantified.size() == 0 && mults.size() == 0) {
             return;
         }
         // If contains MAXSOME or MINSOME
@@ -202,18 +207,30 @@ public final class Translator {
                     throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
                 }
                 final IntIterator iter = vars.iterator();
-                // To reach maximality, let all the primary variables to be true.
-                if (q.quantifier() == Quantifier.MAXSOME) {
+                if (q.quantifier() == Quantifier.MAXSOME || q.quantifier() == Quantifier.MINSOME) {
+                    final int sign = q.quantifier() == Quantifier.MAXSOME ? 1 : -1;
                     while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[]{iter.next()});
+                        wcnf.addSoftClause(new int[]{ sign*iter.next() });
                     }
                 }
-                // To reach minimality, let all the primary variables to be false.
-                else if (q.quantifier() == Quantifier.MINSOME) {
+            }
+        }
+        for (MultiplicityFormula m: mults) {
+            if (m.expression() instanceof Relation) {
+                // Get the primary variables by the name of the relation
+                final IntSet vars = translation.primaryVariables((Relation) m.expression());
+                if (vars == null) {
+                    throw new IllegalArgumentException("No primary variables found for relation: " + m.expression());
+                }
+                final IntIterator iter = vars.iterator();
+                if (m.multiplicity() == Multiplicity.MAXSOME || m.multiplicity() == Multiplicity.MINSOME) {
+                    final int sign = m.multiplicity() == Multiplicity.MAXSOME ? 1 : -1;
                     while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[] {-iter.next()});
+                        wcnf.addSoftClause(new int[]{ sign*iter.next() });
                     }
                 }
+            } else {
+                throw new IllegalArgumentException("Unsupported maximality multiplicity of relation");
             }
         }
     }

@@ -864,6 +864,12 @@ public final class TranslateKodkodToJava implements VoidVisitor {
             case SOME :
                 file.printf("Formula %s=%s.some();%n", newname, sub);
                 break;
+            case MAXSOME :
+                file.printf("Formula %s=%s.maxSome();%n", newname, sub);
+                break;
+            case MINSOME :
+                file.printf("Formula %s=%s.minSome();%n", newname, sub);
+                break;
             case NO :
                 file.printf("Formula %s=%s.no();%n", newname, sub);
                 break;
