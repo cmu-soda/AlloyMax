@@ -103,6 +103,15 @@ public abstract class SATFactory {
         public String toString() {
             return "DefaultSAT4JMaxsat";
         }
+
+        /**
+         * FIXME: For now, SAT4JMax does not support incremental solving.
+         * @return
+         */
+        @Override
+        public boolean incremental() {
+            return false;
+        }
     };
 
     /**
