@@ -22,7 +22,7 @@ final class SAT4JMax implements MaxSATSolver {
      * Construct a wrapper for the default maxsat solver.
      */
     public SAT4JMax() {
-        solver = new WeightedMaxSatDecorator(SolverFactory.instance().defaultSolver());
+        solver = new WeightedMaxSatDecorator(org.sat4j.pb.SolverFactory.newDefaultOptimizer());
         wrapper = new ReadOnlyIVecInt();
         sat = null;
         vars = 0;

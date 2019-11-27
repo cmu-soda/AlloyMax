@@ -110,7 +110,7 @@ public abstract class SATFactory {
          */
         @Override
         public boolean incremental() {
-            return false;
+            return true;
         }
     };
 
