@@ -1,4 +1,4 @@
-package mytests;
+package maxsat;
 
 import kodkod.ast.*;
 import kodkod.ast.operator.FormulaOperator;

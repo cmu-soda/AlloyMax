@@ -1,7 +1,6 @@
-package mytests;
+package maxsat;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import kodkod.ast.*;
 import kodkod.ast.operator.*;
@@ -22,9 +21,10 @@ import kodkod.engine.config.Options;
       (this . this/Role.rule) in ((this/Assign + this/Receive) -> (this/IntGrade +
       this/ExtGrade))) &&
     ((this/Role.rule . univ) . univ) in (this/Faculty + this/Student + this/TA) &&
-    !((this/Student -> this/Assign -> this/IntGrade) in this/Role.rule) &&
-    (some r: this/Faculty + this/Student + this/TA |
-      (this/Assign -> this/IntGrade) in (r . this/Role.rule)) &&
+    this/Faculty in {rolesAccessResource_r: this/Faculty + this/Student +
+    this/TA | some rolesAccessResource_a: this/Assign + this/Receive |
+     (rolesAccessResource_a -> this/IntGrade) in (rolesAccessResource_r .
+     this/Role.rule)} &&
     Int/min = Int/min &&
     Int/zero = Int/zero &&
     Int/max = Int/max &&
@@ -41,7 +41,7 @@ import kodkod.engine.config.Options;
     this/Role.rule = this/Role.rule
   ==================================================
 */
-public final class GradeSysTest2 {
+public final class GradeSysTest6 {
 
     public static void main(String[] args) throws Exception {
 
@@ -192,16 +192,16 @@ public final class GradeSysTest2 {
         Expression x35=x13.join(Expression.UNIV);
         Expression x34=x35.join(Expression.UNIV);
         Formula x33=x34.in(x27);
-        Expression x40=x9.product(x11);
-        Expression x39=x7.product(x40);
-        Formula x38=x39.in(x13);
-        Formula x37=x38.not();
-        Variable x43=Variable.unary("r");
-        Decls x42=x43.oneOf(x27);
-        Expression x45=x9.product(x11);
-        Expression x46=x43.join(x13);
+        Variable x40=Variable.unary("rolesAccessResource_r");
+        Decls x39=x40.oneOf(x27);
+        Variable x43=Variable.unary("rolesAccessResource_a");
+        Decls x42=x43.oneOf(x31);
+        Expression x45=x43.product(x11);
+        Expression x46=x40.join(x13);
         Formula x44=x45.in(x46);
-        Formula x41=x44.forMaxSome(x42);
+        Formula x41=x44.forSome(x42);
+        Expression x38=x41.comprehension(x39);
+        Formula x37=x6.in(x38);
         Formula x47=x0.eq(x0);
         Formula x48=x1.eq(x1);
         Formula x49=x2.eq(x2);
@@ -216,7 +216,7 @@ public final class GradeSysTest2 {
         Formula x58=x11.eq(x11);
         Formula x59=x12.eq(x12);
         Formula x60=x13.eq(x13);
-        Formula x14=Formula.compose(FormulaOperator.AND, x15, x17, x20, x22, x24, x33, x37, x41, x47, x48, x49, x50, x51, x52, x53, x54, x55, x56, x57, x58, x59, x60);
+        Formula x14=Formula.compose(FormulaOperator.AND, x15, x17, x20, x22, x24, x33, x37, x47, x48, x49, x50, x51, x52, x53, x54, x55, x56, x57, x58, x59, x60);
 
         Solver solver = new Solver();
 //        solver.options().setSolver(SATFactory.DefaultSAT4J);
@@ -230,13 +230,5 @@ public final class GradeSysTest2 {
         System.out.flush();
         Solution sol = solver.solve(x14,bounds);
         System.out.println(sol.toString());
-        System.out.println("The set of roles is:");
-        TupleSet set = sol.instance().tuples("$r");
-        if (set != null) {
-            final Iterator iter = set.iterator();
-            while (iter.hasNext()) {
-                System.out.println(iter.next());
-            }
-        }
     }
 }

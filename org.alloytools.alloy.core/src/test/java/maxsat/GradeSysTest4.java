@@ -1,4 +1,4 @@
-package mytests;
+package maxsat;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -28,10 +28,11 @@ import kodkod.engine.config.Options;
         this/Course.policy))) &&
     !((this/Math -> this/TA -> this/Assign -> this/IntGrade) in
       this/Course.policy) &&
-    (some cs: set this/Math + this/Physics, rs: set this/Faculty + this/Student +
-     this/TA |
-      all c: cs, r: rs |
-       (r -> this/Assign -> this/IntGrade) in (c . this/Course.policy)) &&
+    (some cs: set this/Math + this/Physics |
+      all c: cs |
+       some rs: set this/Faculty + this/Student + this/TA |
+        all r: rs |
+         (r -> this/Assign -> this/IntGrade) in (c . this/Course.policy)) &&
     Int/min = Int/min &&
     Int/zero = Int/zero &&
     Int/max = Int/max &&
@@ -50,7 +51,7 @@ import kodkod.engine.config.Options;
     this/Course.policy = this/Course.policy
   ==================================================
 */
-public final class GradeSysTest5 {
+public final class GradeSysTest4 {
 
     public static void main(String[] args) throws Exception {
 
@@ -242,22 +243,22 @@ public final class GradeSysTest5 {
         Expression x54=x13.product(x55);
         Formula x53=x54.in(x15);
         Formula x52=x53.not();
-        Variable x60=Variable.unary("cs");
-        Decls x59=x60.setOf(x31);
-        Variable x62=Variable.unary("rs");
-        Decls x61=x62.setOf(x35);
-        Decls x58=x59.and(x61);
-        Variable x66=Variable.unary("c");
-        Decls x65=x66.oneOf(x60);
+        Variable x59=Variable.unary("cs");
+        Decls x58=x59.setOf(x31);
+        Variable x62=Variable.unary("c");
+        Decls x61=x62.oneOf(x59);
+        Variable x65=Variable.unary("rs");
+        Decls x64=x65.setOf(x35);
         Variable x68=Variable.unary("r");
-        Decls x67=x68.oneOf(x62);
-        Decls x64=x65.and(x67);
+        Decls x67=x68.oneOf(x65);
         Expression x71=x9.product(x11);
         Expression x70=x68.product(x71);
-        Expression x72=x66.join(x15);
+        Expression x72=x62.join(x15);
         Formula x69=x70.in(x72);
-        Formula x63=x69.forAll(x64);
-        Formula x57=x63.forMaxSome(x58);
+        Formula x66=x69.forAll(x67);
+        Formula x63=x66.forMaxSome(x64);
+        Formula x60=x63.forAll(x61);
+        Formula x57=x60.forMaxSome(x58);
         Formula x73=x0.eq(x0);
         Formula x74=x1.eq(x1);
         Formula x75=x2.eq(x2);
@@ -306,4 +307,3 @@ public final class GradeSysTest5 {
         }
     }
 }
-
