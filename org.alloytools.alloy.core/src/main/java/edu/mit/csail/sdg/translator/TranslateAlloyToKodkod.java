@@ -242,6 +242,7 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
     /**
      * Conjoin the constraints for "field declarations" and "fact" paragraphs
      */
+    // TODO: Facts are translated here all in one big conjunction!
     private void makeFacts(Expr facts) throws Err {
         rep.debug("Generating facts...\n");
         // convert into a form that hopefully gives better unsat core
