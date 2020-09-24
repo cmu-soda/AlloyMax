@@ -322,7 +322,7 @@ public final class CourseSchedule {
         Formula x16=Formula.compose(FormulaOperator.AND, x17, x19, x21, x24, x26, x33, x36, x41, x43, x51, x53, x59, x67, x70, x76, x77, x78, x79, x80, x81, x82, x83, x84, x85, x86, x87, x88, x89, x90, x91);
 
         Solver solver = new Solver();
-        solver.options().setSolver(SATFactory.DefaultSAT4J);
+        solver.options().setSolver(SATFactory.MiniSatProver);
         solver.options().setBitwidth(4);
 //        solver.options().setFlatten(false);
         solver.options().setIntEncoding(Options.IntEncoding.TWOSCOMPLEMENT);

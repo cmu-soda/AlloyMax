@@ -383,6 +383,8 @@ public final class A4Solution {
             solver.options().setCoreGranularity(opt.coreGranularity);
         } else if (opt.solver.equals(SatSolver.SAT4JMax)) {
             solver.options().setSolver(SATFactory.DefaultSAT4JMax);
+            solver.options().setLogTranslation(2);
+            solver.options().setCoreGranularity(opt.coreGranularity);
         } else {
             solver.options().setSolver(SATFactory.DefaultSAT4J); // Even for
                                                                 // "KK" and
@@ -1410,8 +1412,11 @@ public final class A4Solution {
             String out = tmpCNF.getAbsolutePath();
             if (opt.solver.equals(SatSolver.CNF))
                 solver.options().setSolver(WriteCNF.factory(out));
-            else
+            else {
                 solver.options().setSolver(WriteWCNF.factory(out));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            }
             try {
                 sol = solver.solve(fgoal, bounds);
             } catch (WriteCNF.WriteCNFCompleted ex) {
