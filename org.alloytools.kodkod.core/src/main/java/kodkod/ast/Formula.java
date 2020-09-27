@@ -52,6 +52,16 @@ public abstract class Formula extends Node {
 
     Formula() {}
 
+    private boolean soft;
+
+    public final boolean isSoft() {
+        return soft;
+    }
+
+    public final void setSoft(boolean soft) {
+        this.soft = soft;
+    }
+
     /**
      * Returns the constant formula with the given value.
      *

@@ -171,8 +171,34 @@ public final class Translator {
      */
     public static Translation.Whole translate(Formula formula, Bounds bounds, Options options) {
         Translation.Whole translation = (Translation.Whole) (new Translator(formula, bounds, options)).translate();
+        makeSoftFacts(translation);
         appendMaxSatSoftClauses(translation, formula);
         return translation;
+    }
+
+    /**
+     *
+     * @param translation
+     */
+    private static void makeSoftFacts(Translation.Whole translation) {
+        MaxSATSolver wcnf = null;
+        TranslationLog log = translation.log();
+        // TODO: check whether the formula has soft facts
+        if (log == null)
+            return;
+
+        for (Iterator<TranslationRecord> itr = log.replay(); itr.hasNext(); ) {
+            TranslationRecord record = itr.next();
+            if (log.roots().contains(record.translated()) && record.translated().isSoft()) {
+                if (wcnf == null) {
+                    if (!(translation.cnf() instanceof MaxSATSolver)) {
+                        throw new IllegalArgumentException("The solver should be a MaxSAT solver!");
+                    }
+                    wcnf = (MaxSATSolver) translation.cnf();
+                }
+                wcnf.setSoftClause(new int[]{record.literal()});
+            }
+        }
     }
 
     /**

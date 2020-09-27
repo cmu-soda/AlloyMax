@@ -6,6 +6,10 @@ import org.sat4j.maxsat.WeightedMaxSatDecorator;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.TimeoutException;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * A wrapper class tha provides access to the basic functionality of SAT4JMaxsat.
  *
@@ -13,10 +17,21 @@ import org.sat4j.specs.TimeoutException;
  */
 final class SAT4JMax implements MaxSATSolver {
 
+    private static final class Clause {
+        private final int[] lits;
+        private boolean soft;
+
+        Clause(int[] lits, boolean soft) {
+            this.lits = lits;
+            this.soft = soft;
+        }
+    }
+
     private WeightedMaxSatDecorator solver;
     private final ReadOnlyIVecInt wrapper;
     private Boolean sat;
     private int vars, clauses;
+    private final List<Clause> cached;
 
     /**
      * Construct a wrapper for the default maxsat solver.
@@ -27,6 +42,7 @@ final class SAT4JMax implements MaxSATSolver {
         sat = null;
         vars = 0;
         clauses = 0;
+        cached = new LinkedList<>();
     }
 
     @Override
@@ -51,31 +67,42 @@ final class SAT4JMax implements MaxSATSolver {
 
     @Override
     public boolean addClause(int[] lits) {
-        try {
-            if (!Boolean.FALSE.equals(sat)) {
-                clauses++;
-                // Clauses are added as hard clauses through the old api
-                solver.addHardClause(wrapper.wrap(lits));
-                return true;
-            }
-        } catch (ContradictionException e) {
-            sat = Boolean.FALSE;
+        if (!Boolean.FALSE.equals(sat)) {
+            clauses++;
+            cached.add(new Clause(lits.clone(), false));
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean addSoftClause(int[] lits) {
-        try {
-            if (!Boolean.FALSE.equals(sat)) {
-                clauses++;
-                solver.addSoftClause(wrapper.wrap(lits));
-                return true;
-            }
-        } catch (ContradictionException e) {
-            sat = Boolean.FALSE;
+        if (!Boolean.FALSE.equals(sat)) {
+            clauses++;
+            cached.add(new Clause(lits.clone(), true));
+            return true;
         }
         return false;
+    }
+
+    @Override
+    public void setSoftClause(int[] lits) {
+        for (Clause c : cached) {
+            if (Arrays.equals(c.lits, lits)) {
+                c.soft = true;
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void setHardClause(int[] lits) {
+        for (Clause c : cached) {
+            if (Arrays.equals(c.lits, lits)) {
+                c.soft = false;
+                return;
+            }
+        }
     }
 
     @Override
@@ -85,12 +112,20 @@ final class SAT4JMax implements MaxSATSolver {
                 return false;
             }
             if (!Boolean.FALSE.equals(sat)) {
+                for (Clause c : cached) {
+                    if (c.soft)
+                        solver.addSoftClause(wrapper.wrap(c.lits));
+                    else
+                        solver.addHardClause(wrapper.wrap(c.lits));
+                }
                 sat = solver.isSatisfiable();
             }
-            return sat;
+        } catch (ContradictionException e) {
+            sat = Boolean.FALSE;
         } catch (TimeoutException e) {
             throw new RuntimeException("timed out");
         }
+        return sat;
     }
 
     @Override

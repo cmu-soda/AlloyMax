@@ -297,6 +297,7 @@ public final class CourseSchedule {
         Expression x69=x7.join(x14);
         Expression x68=x69.join(x15);
         Formula x67=x68.in(x12);
+        x67.setSoft(true);  // Set ((this/Bob . this/Student.courses) . this/Course.time) in this/Afternoon to soft constraint
         Variable x72=Variable.unary("s");
         Decls x71=x72.oneOf(x29);
         Expression x74=x72.join(x13);
@@ -322,7 +323,9 @@ public final class CourseSchedule {
         Formula x16=Formula.compose(FormulaOperator.AND, x17, x19, x21, x24, x26, x33, x36, x41, x43, x51, x53, x59, x67, x70, x76, x77, x78, x79, x80, x81, x82, x83, x84, x85, x86, x87, x88, x89, x90, x91);
 
         Solver solver = new Solver();
-        solver.options().setSolver(SATFactory.MiniSatProver);
+        solver.options().setSolver(SATFactory.DefaultSAT4JMax);
+        solver.options().setLogTranslation(2);
+        solver.options().setCoreGranularity(0);
         solver.options().setBitwidth(4);
 //        solver.options().setFlatten(false);
         solver.options().setIntEncoding(Options.IntEncoding.TWOSCOMPLEMENT);
