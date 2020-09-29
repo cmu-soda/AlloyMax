@@ -158,6 +158,7 @@ parser code {:
     ch.put(CompSym.EXH, "exh");
     ch.put(CompSym.EXPECT, "expect");
     ch.put(CompSym.EXTENDS, "extends");
+    ch.put(CompSym.SOFT, "soft");
     ch.put(CompSym.FACT, "fact");
     ch.put(CompSym.FOR, "for");
     ch.put(CompSym.FUN, "fun");
@@ -417,6 +418,7 @@ terminal Pos EXACTLY;          //  exactly
 terminal Pos EXH;              //  exh exhaustive
 terminal Pos EXPECT;           //  expect
 terminal Pos EXTENDS;          //  extends
+terminal Pos SOFT;             //  soft
 terminal Pos FACT;             //  fact
 terminal Pos FOR;              //  for
 terminal Pos FUN;              //  fun
@@ -585,6 +587,9 @@ Spec ::= Spec Vis:p OPEN:o Name:a LBRACKET SigRefs:b RBRACKET:c                {
 Spec ::= Spec Vis:p OPEN:o Name:a LBRACKET SigRefs:b RBRACKET   AS Name:c      {: nod(a); nod(c); parser.alloymodule.addOpen(o.merge(c.pos), p, a, b,    c);    :};
 Spec ::= Spec Vis:p ENUM:o Name:a LBRACE Names:n RBRACE:c                      {: nod(a);         parser.alloymodule.addEnum(o.merge(c),     p, a, n,    c);    :};
 Spec ::= Spec Vis:p ENUM:o Name:a LBRACE         RBRACE:c                      {: nod(a);         parser.alloymodule.addEnum(o.merge(c),     p, a, null, c);    :};
+Spec ::= Spec SOFT  FACT:o          Super:e {:         parser.alloymodule.addSoftFact  (o , ""       , e); :};
+Spec ::= Spec SOFT  FACT:o   Name:n Super:e {: nod(n); parser.alloymodule.addSoftFact  (o , n.label  , e); :};
+Spec ::= Spec SOFT  FACT:o   STR:n  Super:e {:         parser.alloymodule.addSoftFact  (o , n.string , e); :};
 Spec ::= Spec       FACT:o          Super:e {:         parser.alloymodule.addFact      (o , ""       , e); :};
 Spec ::= Spec       FACT:o   Name:n Super:e {: nod(n); parser.alloymodule.addFact      (o , n.label  , e); :};
 Spec ::= Spec       FACT:o   STR:n  Super:e {:         parser.alloymodule.addFact      (o , n.string , e); :};

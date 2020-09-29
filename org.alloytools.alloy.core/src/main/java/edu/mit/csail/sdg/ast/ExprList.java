@@ -125,13 +125,23 @@ public final class ExprList extends Expr {
         if (x.isSame(ExprConstant.TRUE))
             return;
         if (x instanceof ExprBinary && ((ExprBinary) x).op == ExprBinary.Op.AND) {
+            // Make the sub-expressions soft. Modified by Changjian Zhang.
+            if (expr.isSoft()) {
+                ((ExprBinary) x).left.setSoft(true);
+                ((ExprBinary) x).right.setSoft(true);
+            }
             addAND(list, ((ExprBinary) x).left);
             addAND(list, ((ExprBinary) x).right);
             return;
         }
         if (x instanceof ExprList && ((ExprList) x).op == ExprList.Op.AND) {
-            for (Expr y : ((ExprList) x).args)
+            for (Expr y : ((ExprList) x).args) {
+                // Make the sub-expressions soft. Modified by Changjian Zhang.
+                if (expr.isSoft()) {
+                    y.setSoft(true);
+                }
                 addAND(list, y);
+            }
             return;
         }
         list.add(expr);

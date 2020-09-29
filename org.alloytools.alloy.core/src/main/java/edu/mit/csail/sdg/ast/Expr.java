@@ -97,6 +97,17 @@ public abstract class Expr extends Browsable {
     /** This is an unmodifiable empty list of Err objects. */
     static final JoinableList<Err> emptyListOfErrors = new JoinableList<Err>();
 
+    /** This field defines whether this expression is a soft constraint or not. Modified by Changjian Zhang **/
+    private boolean soft = false;
+
+    public boolean isSoft() {
+        return soft;
+    }
+
+    public void setSoft(boolean soft) {
+        this.soft = soft;
+    }
+
     // ================================================================================================================//
 
     /**

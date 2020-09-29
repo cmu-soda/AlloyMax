@@ -187,6 +187,7 @@ import java_cup.runtime.*;
 "exh"                 { return alloy_sym(yytext(), CompSym.EXH         );}
 "expect"              { return alloy_sym(yytext(), CompSym.EXPECT      );}
 "extends"             { return alloy_sym(yytext(), CompSym.EXTENDS     );}
+"soft"                { return alloy_sym(yytext(), CompSym.SOFT        );}
 "fact"                { return alloy_sym(yytext(), CompSym.FACT        );}
 "for"                 { return alloy_sym(yytext(), CompSym.FOR         );}
 "fun"                 { return alloy_sym(yytext(), CompSym.FUN         );}

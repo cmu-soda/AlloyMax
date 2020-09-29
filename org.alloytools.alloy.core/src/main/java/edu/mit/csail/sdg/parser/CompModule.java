@@ -1748,6 +1748,16 @@ public final class CompModule extends Browsable implements Module {
         facts.add(new Pair<String,Expr>(name, ExprUnary.Op.NOOP.make(value.span().merge(pos), value)));
     }
 
+    /** Add a soft FACT declaration. Modified by Changjian Zhang */
+    void addSoftFact(Pos pos, String name, Expr value) throws Err {
+        status = 3;
+        if (name == null || name.length() == 0)
+            name = "softfact$" + (1 + facts.size());
+        Expr expr = ExprUnary.Op.NOOP.make(value.span().merge(pos), value);
+        expr.setSoft(true);
+        facts.add(new Pair<String,Expr>(name, expr));
+    }
+
     /**
      * Each fact name now points to a typechecked Expr rather than an untypechecked
      * Exp; we'll also add the sig appended facts.
@@ -1758,6 +1768,10 @@ public final class CompModule extends Browsable implements Module {
             String name = facts.get(i).a;
             Expr expr = facts.get(i).b;
             Expr checked = cx.check(expr);
+
+            // Copy the soft state of this expression. Modified by Changjian Zhang.
+            checked.setSoft(expr.isSoft());
+
             expr = checked.resolve_as_formula(warns);
             if (expr.errors.isEmpty()) {
                 facts.set(i, new Pair<String,Expr>(name, expr));
