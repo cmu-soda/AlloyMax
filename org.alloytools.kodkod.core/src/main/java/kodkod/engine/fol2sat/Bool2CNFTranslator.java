@@ -309,6 +309,8 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
                 if (n) {
                     lastClause[i++] = iLit * -sgn;
 
+                    // We know that some r will be translated into (x1\/x2\/..\/xn\/-xout)/\(xout),
+                    // so here we make all the xi's to soft.
                     // If the boolean formula is a multiplicity formula with maxsome and minsome,
                     // then add the inputs as soft clauses.
                     // Modified by Changjian Zhang
