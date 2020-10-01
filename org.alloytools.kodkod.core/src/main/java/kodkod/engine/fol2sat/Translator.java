@@ -22,7 +22,6 @@
 package kodkod.engine.fol2sat;
 
 import kodkod.ast.*;
-import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.AbstractReplacer;
 import kodkod.engine.bool.*;
@@ -39,6 +38,7 @@ import kodkod.util.ints.IndexedEntry;
 import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
 import kodkod.util.nodes.AnnotatedNode;
+import kodkod.util.nodes.Nodes;
 
 import java.util.*;
 
@@ -171,8 +171,8 @@ public final class Translator {
      */
     public static Translation.Whole translate(Formula formula, Bounds bounds, Options options) {
         Translation.Whole translation = (Translation.Whole) (new Translator(formula, bounds, options)).translate();
-        makeSoftFacts(translation);
-        appendMaxSatSoftClauses(translation, formula);
+        makeSoftFacts(formula, translation);
+        appendMaxSatQuatifiers(translation, formula);
         return translation;
     }
 
@@ -180,19 +180,28 @@ public final class Translator {
      *
      * @param translation
      */
-    private static void makeSoftFacts(Translation.Whole translation) {
-        MaxSATSolver wcnf = null;
-        TranslationLog log = translation.log();
-        // TODO: check whether the formula has soft facts
-        if (log == null)
+    private static void makeSoftFacts(Formula formula, Translation.Whole translation) {
+        boolean hasSoft = false;
+        for (Formula f : Nodes.roots(formula)) {
+            if (f.isSoft()) {
+                hasSoft = true;
+                break;
+            }
+        }
+        if (!hasSoft)
             return;
 
+        TranslationLog log = translation.log();
+        if (log == null)
+            throw new IllegalStateException("To use soft facts, the solver should be a MaxSAT solver with logging enabled!");
+
+        MaxSATSolver wcnf = null;
         for (Iterator<TranslationRecord> itr = log.replay(); itr.hasNext(); ) {
             TranslationRecord record = itr.next();
             if (log.roots().contains(record.translated()) && record.translated().isSoft()) {
                 if (wcnf == null) {
                     if (!(translation.cnf() instanceof MaxSATSolver)) {
-                        throw new IllegalArgumentException("The solver should be a MaxSAT solver!");
+                        throw new IllegalStateException("To use soft facts, the solver should be a MaxSAT solver!");
                     }
                     wcnf = (MaxSATSolver) translation.cnf();
                 }
@@ -208,19 +217,17 @@ public final class Translator {
      *
      * @author Changjian Zhang
      */
-    private static void appendMaxSatSoftClauses(Translation.Whole translation, Formula formula) {
+    private static void appendMaxSatQuatifiers(Translation.Whole translation, Formula formula) {
         final MaximalityQuantifierFinder quantFinder = new MaximalityQuantifierFinder(new HashSet<>());
         final Set<QuantifiedFormula> quantified = formula.accept(quantFinder);
-        final MaximalityMultifierFinder multFinder = new MaximalityMultifierFinder(new HashSet<>());
-        final Set<MultiplicityFormula> mults = formula.accept(multFinder);
 
         // No maxsome or minsome are used in the formula
-        if (quantified.size() == 0 && mults.size() == 0) {
+        if (quantified.size() == 0) {
             return;
         }
         // If contains MAXSOME or MINSOME
         if (!(translation.cnf() instanceof MaxSATSolver)) {
-            throw new IllegalArgumentException("The solver should be a MaxSAT solver!");
+            throw new IllegalStateException("To use maxsome/minsome quantifiers, the solver should be a MaxSAT solver!");
         }
         final MaxSATSolver wcnf = (MaxSATSolver) translation.cnf();
         // Add all the primary variables of the corresponding SkolemRelation as soft clauses
@@ -230,7 +237,7 @@ public final class Translator {
                 final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
                 if (vars == null) {
                     // This is probably caused by the use of MAXSOME or MINSOME quantifier in set comprehension.
-                    throw new IllegalArgumentException("No primary variables for declaration: " + decl.variable().name());
+                    throw new IllegalStateException("No primary variables for declaration: " + decl.variable().name());
                 }
                 final IntIterator iter = vars.iterator();
                 if (q.quantifier() == Quantifier.MAXSOME || q.quantifier() == Quantifier.MINSOME) {
@@ -239,24 +246,6 @@ public final class Translator {
                         wcnf.addSoftClause(new int[]{ sign*iter.next() });
                     }
                 }
-            }
-        }
-        for (MultiplicityFormula m: mults) {
-            if (m.expression() instanceof Relation) {
-                // Get the primary variables by the name of the relation
-                final IntSet vars = translation.primaryVariables((Relation) m.expression());
-                if (vars == null) {
-                    throw new IllegalArgumentException("No primary variables found for relation: " + m.expression());
-                }
-                final IntIterator iter = vars.iterator();
-                if (m.multiplicity() == Multiplicity.MAXSOME || m.multiplicity() == Multiplicity.MINSOME) {
-                    final int sign = m.multiplicity() == Multiplicity.MAXSOME ? 1 : -1;
-                    while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[]{ sign*iter.next() });
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException("Unsupported maximality multiplicity of relation");
             }
         }
     }

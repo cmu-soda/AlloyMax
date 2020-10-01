@@ -23,6 +23,7 @@ package kodkod.engine.fol2sat;
 
 import static kodkod.engine.bool.Operator.AND;
 
+import kodkod.ast.operator.Multiplicity;
 import kodkod.engine.bool.BooleanConstant;
 import kodkod.engine.bool.BooleanFactory;
 import kodkod.engine.bool.BooleanFormula;
@@ -32,6 +33,7 @@ import kodkod.engine.bool.ITEGate;
 import kodkod.engine.bool.MultiGate;
 import kodkod.engine.bool.NotGate;
 import kodkod.engine.bool.Operator;
+import kodkod.engine.satlab.MaxSATSolver;
 import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.util.ints.IntSet;
@@ -279,6 +281,10 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
      */
     @Override
     public final int[] visit(MultiGate multigate, Object arg) {
+        if (multigate.getSoft() != null && !(solver instanceof MaxSATSolver)) {
+            throw new IllegalStateException("To use maxsome/minsome, the solver should be a MaxSAT solver!");
+        }
+
         final int oLit = multigate.label();
         if (visited.add(oLit)) {
             final int sgn;
@@ -302,6 +308,15 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
                 }
                 if (n) {
                     lastClause[i++] = iLit * -sgn;
+
+                    // If the boolean formula is a multiplicity formula with maxsome and minsome,
+                    // then add the inputs as soft clauses.
+                    // Modified by Changjian Zhang
+                    // FIXME: This is an intrusive implementation. MultiGate should not know maxsome/minsome
+                    if (Multiplicity.MAXSOME.equals(multigate.getSoft()))
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * -sgn));
+                    else if (Multiplicity.MINSOME.equals(multigate.getSoft()))
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn));
                 }
             }
             if (n) {

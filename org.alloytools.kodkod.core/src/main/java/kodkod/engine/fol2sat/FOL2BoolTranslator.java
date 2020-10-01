@@ -67,14 +67,7 @@ import kodkod.ast.operator.FormulaOperator;
 import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.ReturnVisitor;
-import kodkod.engine.bool.BooleanAccumulator;
-import kodkod.engine.bool.BooleanConstant;
-import kodkod.engine.bool.BooleanFactory;
-import kodkod.engine.bool.BooleanMatrix;
-import kodkod.engine.bool.BooleanValue;
-import kodkod.engine.bool.Dimensions;
-import kodkod.engine.bool.Int;
-import kodkod.engine.bool.Operator;
+import kodkod.engine.bool.*;
 import kodkod.util.ints.IndexedEntry;
 import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
@@ -926,9 +919,15 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 ret = child.none(env);
                 break;
             case SOME :
-            case MAXSOME :
-            case MINSOME :  // FIXME: Might have problem for MINSOME
                 ret = child.some(env);
+                break;
+            case MAXSOME :
+                ret = child.some(env);
+                ((BooleanFormula) ret).setSoft(Multiplicity.MAXSOME);
+                break;
+            case MINSOME :
+                ret = child.some(env);
+                ((BooleanFormula) ret).setSoft(Multiplicity.MINSOME);
                 break;
             case ONE :
                 ret = child.one(env);
