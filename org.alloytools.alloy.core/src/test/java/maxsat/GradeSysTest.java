@@ -6,14 +6,14 @@ import kodkod.engine.Solution;
 import kodkod.engine.Solver;
 import kodkod.engine.config.Options;
 import kodkod.engine.satlab.SATFactory;
-import kodkod.instance.Bounds;
-import kodkod.instance.TupleFactory;
-import kodkod.instance.TupleSet;
-import kodkod.instance.Universe;
+import kodkod.instance.*;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /*
   ====================================================
@@ -261,14 +261,17 @@ public final class GradeSysTest {
         System.out.flush();
         Solution sol = solver.solve(x14, bounds);
         System.out.println(sol.toString());
-        System.out.println("The set of policy is:");
         TupleSet set = sol.instance().tuples("$valid_policy");
-        if (set != null) {
-            final Iterator iter = set.iterator();
-            while (iter.hasNext()) {
-                System.out.println(iter.next());
-            }
-        }
+        assertNotNull(set);
+        final Iterator<Tuple> iter = set.iterator();
+        assertEquals("[Course$0, Faculty$0, Assign$0, ExtGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, Faculty$0, Assign$0, IntGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, Faculty$0, Receive$0, IntGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, Student$0, Receive$0, ExtGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, Student$0, Receive$0, IntGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, TA$0, Assign$0, ExtGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, TA$0, Assign$0, IntGrade$0]", iter.next().toString());
+        assertEquals("[Course$0, TA$0, Receive$0, IntGrade$0]", iter.next().toString());
     }
 }
 

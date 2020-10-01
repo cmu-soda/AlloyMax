@@ -10,6 +10,9 @@ import kodkod.engine.*;
 import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.config.Options;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /*
   ==================================================
     kodkod formula:
@@ -288,22 +291,16 @@ public final class GradeSysTest5 {
         System.out.flush();
         Solution sol = solver.solve(x16,bounds);
         System.out.println(sol.toString());
-        System.out.println("The set of courses is:");
         TupleSet set = sol.instance().tuples("$cs");
-        if (set != null) {
-            final Iterator iter = set.iterator();
-            while (iter.hasNext()) {
-                System.out.println(iter.next());
-            }
-        }
-        System.out.println("The set of roles is:");
+        assertNotNull(set);
+        Iterator<Tuple> iter = set.iterator();
+        assertEquals("[Math$0]", iter.next().toString());
+        assertEquals("[Physics$0]", iter.next().toString());
+
         set = sol.instance().tuples("$rs");
-        if (set != null) {
-            final Iterator iter = set.iterator();
-            while (iter.hasNext()) {
-                System.out.println(iter.next());
-            }
-        }
+        assertNotNull(set);
+        iter = set.iterator();
+        assertEquals("[Faculty$0]", iter.next().toString());
     }
 }
 

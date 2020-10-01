@@ -25,6 +25,11 @@ final class SAT4JMax implements MaxSATSolver {
             this.lits = lits;
             this.soft = soft;
         }
+
+        @Override
+        public String toString() {
+            return Arrays.toString(lits);
+        }
     }
 
     private WeightedMaxSatDecorator solver;

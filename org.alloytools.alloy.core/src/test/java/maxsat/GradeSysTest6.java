@@ -4,10 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import kodkod.ast.*;
 import kodkod.ast.operator.*;
+import kodkod.engine.fol2sat.HigherOrderDeclException;
+import kodkod.engine.fol2sat.UnboundLeafException;
 import kodkod.instance.*;
 import kodkod.engine.*;
 import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.config.Options;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /*
   ==================================================
@@ -199,7 +204,7 @@ public final class GradeSysTest6 {
         Expression x45=x43.product(x11);
         Expression x46=x40.join(x13);
         Formula x44=x45.in(x46);
-        Formula x41=x44.forSome(x42);
+        Formula x41=x44.forMaxSome(x42);
         Expression x38=x41.comprehension(x39);
         Formula x37=x6.in(x38);
         Formula x47=x0.eq(x0);
@@ -228,7 +233,13 @@ public final class GradeSysTest6 {
         solver.options().setSkolemDepth(0);
         System.out.println("Solving...");
         System.out.flush();
-        Solution sol = solver.solve(x14,bounds);
-        System.out.println(sol.toString());
+        Solution sol = null;
+        try {
+            sol = solver.solve(x14,bounds);
+        } catch (Exception e) {
+            assertEquals("No primary variables for declaration: rolesAccessResource_a", e.getMessage());
+            return;
+        }
+        fail("Expected: Exception in thread \"main\" java.lang.IllegalArgumentException: No primary variables for declaration: rolesAccessResource_a");
     }
 }
