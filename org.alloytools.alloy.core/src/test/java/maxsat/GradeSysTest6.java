@@ -15,6 +15,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /*
+
+abstract sig Role {
+	rule: Action -> Resource
+}
+abstract sig Action {}
+abstract sig Resource {}
+
+one sig Faculty, Student, TA extends Role {}
+one sig IntGrade, ExtGrade extends Resource {}
+one sig Assign, Receive extends Action {}
+
+fun rolesAccessResource[resource: Resource]: set Role {
+	{r: Role | some a: Action | a -> resource in r.rule}
+}
+
+run {
+	Faculty in rolesAccessResource[IntGrade]
+}
+
+
   ==================================================
     kodkod formula:
   ==================================================

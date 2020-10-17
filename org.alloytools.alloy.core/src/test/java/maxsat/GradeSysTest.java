@@ -16,29 +16,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /*
-  ====================================================
-    Alloy formula:
-  ====================================================
-    abstract sig Resource {}
-    abstract sig Role {}
-    abstract sig Action {}
-    sig Course {}
+abstract sig Role {} abstract sig Action {} abstract sig Resource {}
 
-    one sig Faculty, Student, TA extends Role {}
-    one sig IntGrade, ExtGrade extends Resource {}
-    one sig Assign, Receive extends Action {}
+// Define atoms in the universe
+one sig Faculty, Student, TA extends Role {}
+one sig IntGrade, ExtGrade extends Resource {}
+one sig Assign, Receive extends Action {}
 
-    pred valid[policy: Course -> Role -> Action -> Resource] {
-        all c: Course {
-            // no student can assign external grade
-            Student -> Assign -> IntGrade not in c.policy
-            // no user can both receive and assign external grades
-            no r: Role | (Assign + Receive) in r.(c.policy).ExtGrade
-        }
-    }
+pred valid[policy: Role -> Action -> Resource] {
+	  // no student can assign external grade
+	  Student -> Assign -> IntGrade not in policy
+    // no user can both receive and assign external grades
+    no r: Role | (Assign + Receive) in r.policy.ExtGrade
+}
 
-    run valid for 1
-  =====================================================
+run {
+    maxsome policy: Role -> Action -> Resource | valid[policy]
+}
+
 */
 
 /*

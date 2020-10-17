@@ -14,6 +14,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /*
+
+abstract sig Role {}
+abstract sig Action {}
+abstract sig Resource {}
+abstract sig Course {
+	policy: Role -> Action -> Resource
+}
+
+one sig Faculty, Student, TA extends Role {}
+one sig IntGrade, ExtGrade extends Resource {}
+one sig Assign, Receive extends Action {}
+one sig Math, Physics extends Course {}
+
+run {
+	all c: Course | Student -> Assign -> IntGrade !in c.policy
+	Math -> TA -> Assign -> IntGrade !in policy
+	maxsome cs: set Course | all c: cs | maxsome rs: set Role | all r: rs |
+		r -> Assign -> IntGrade in c.policy
+}
+
   ==================================================
     kodkod formula:
   ==================================================

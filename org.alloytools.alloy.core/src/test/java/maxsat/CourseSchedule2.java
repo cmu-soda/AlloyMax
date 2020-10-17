@@ -10,6 +10,45 @@ import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.config.Options;
 
 /*
+abstract sig Student {
+	cores: set Course,
+	courses: set Course,
+	afternooncourses: set Course
+} {
+	afternooncourses = {c : courses | c.time in Afternoon}
+}
+
+abstract sig Course {
+	time: one Time
+}
+
+abstract sig Time {}
+
+one sig Alice, Bob extends Student {}
+one sig Models, Architecture, Management, Requirements extends Course {}
+one sig Morning, Afternoon extends Time {}
+
+// Set the time for the courses.
+fact {
+	time = (Models -> Morning) + (Architecture -> Morning) + (Management -> Afternoon) + (Requirements -> Afternoon)
+}
+
+
+// Set the cores for the students
+fact {
+	cores = (Alice -> Models) + (Alice -> Architecture) +
+					(Bob -> Models) + (Bob -> Management)
+}
+
+pred MustTakeCores[s: Student] {
+	s.cores in s.courses
+}
+
+run {
+	all s: Student | MustTakeCores[s] and maxsome Bob.afternooncourses
+}
+
+
   ==================================================
     kodkod formula:
   ==================================================
