@@ -1,13 +1,12 @@
 package kodkod.engine.satlab;
 
 import kodkod.util.collections.ReadOnlyIVecInt;
-import org.sat4j.maxsat.SolverFactory;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.TimeoutException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,6 +36,7 @@ final class SAT4JMax implements MaxSATSolver {
     private Boolean sat;
     private int vars, clauses;
     private final List<Clause> cached;
+    private int cacheIdx = 0;
 
     /**
      * Construct a wrapper for the default maxsat solver.
@@ -47,7 +47,7 @@ final class SAT4JMax implements MaxSATSolver {
         sat = null;
         vars = 0;
         clauses = 0;
-        cached = new LinkedList<>();
+        cached = new ArrayList<>();
     }
 
     @Override
@@ -117,11 +117,13 @@ final class SAT4JMax implements MaxSATSolver {
                 return false;
             }
             if (!Boolean.FALSE.equals(sat)) {
-                for (Clause c : cached) {
+                while (cacheIdx < cached.size()) {
+                    Clause c = cached.get(cacheIdx);
                     if (c.soft)
                         solver.addSoftClause(wrapper.wrap(c.lits));
                     else
                         solver.addHardClause(wrapper.wrap(c.lits));
+                    cacheIdx++;
                 }
                 sat = solver.isSatisfiable();
             }
