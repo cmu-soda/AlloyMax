@@ -314,10 +314,9 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
                     // If the boolean formula is a multiplicity formula with maxsome and minsome,
                     // then add the inputs as soft clauses.
                     // Modified by Changjian Zhang
-                    // FIXME: This is an intrusive implementation. MultiGate should not know maxsome/minsome
-                    if (Multiplicity.MAXSOME.equals(multigate.getSoft()))
+                    if (BooleanFormula.SoftConstraint.MAXSOME.equals(multigate.getSoft()))
                         ((MaxSATSolver) solver).addSoftClause(clause(iLit * -sgn));
-                    else if (Multiplicity.MINSOME.equals(multigate.getSoft()))
+                    else if (BooleanFormula.SoftConstraint.MINSOME.equals(multigate.getSoft()))
                         ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn));
                 }
             }

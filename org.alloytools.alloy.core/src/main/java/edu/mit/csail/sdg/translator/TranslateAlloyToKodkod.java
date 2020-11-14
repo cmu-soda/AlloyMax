@@ -283,6 +283,8 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
             }
         }
         k2pos_enabled = true;
+        // Note: fact { f1 && f2 } will be broke into fact { f1 } fact { f2 } here. This will affect maxsat behavior.
+        // By Changjian Zhang
         recursiveAddFormula(facts);
     }
 

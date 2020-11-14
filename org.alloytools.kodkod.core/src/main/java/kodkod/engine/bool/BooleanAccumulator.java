@@ -119,7 +119,7 @@ public final class BooleanAccumulator extends BooleanValue implements Iterable<B
             return op.shortCircuit();
         else {
             final int lit = v.label();
-            if (v == op.shortCircuit() || inputs.containsIndex(-lit)) {
+            if (v == op.shortCircuit() || (inputs.containsIndex(-lit) && !hasSoftFacts(v, inputs.get(-lit)))) {
                 inputs.clear();
                 inputs.put(op.shortCircuit().label, op.shortCircuit());
                 return op.shortCircuit();
@@ -135,6 +135,19 @@ public final class BooleanAccumulator extends BooleanValue implements Iterable<B
             // if (v!=op.identity()) { inputs.add(v); }
             return this;
         }
+    }
+
+    /**
+     * Return true when either of the boolean value object is a boolean formula and is a soft constraint
+     * @param v1
+     * @param v2
+     * @return
+     */
+    private boolean hasSoftFacts(BooleanValue v1, BooleanValue v2) {
+        if (!(v1 instanceof BooleanFormula && v2 instanceof BooleanFormula))
+            return false;
+        return BooleanFormula.SoftConstraint.SOFTFACT.equals(((BooleanFormula) v1).getSoft()) ||
+            BooleanFormula.SoftConstraint.SOFTFACT.equals(((BooleanFormula) v2).getSoft());
     }
 
     /**

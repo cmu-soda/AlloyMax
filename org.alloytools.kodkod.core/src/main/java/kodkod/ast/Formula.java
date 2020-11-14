@@ -58,7 +58,7 @@ public abstract class Formula extends Node {
         return soft;
     }
 
-    public final void setSoft(boolean soft) {
+    public void setSoft(boolean soft) {
         this.soft = soft;
     }
 

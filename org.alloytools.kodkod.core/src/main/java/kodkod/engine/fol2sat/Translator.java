@@ -593,6 +593,9 @@ public final class Translator {
      *             but this.options.skolemDepth < 0
      */
     private Translation translate() {
+        // When logging is enabled, this will flatten the original formula, i.e.,
+        // make ((f0 && f1) && f2) to (f0 && f1 && f2). This is originally used to get better unsat core, but is
+        // also necessary for maxsat. By Changjian Zhang
         final AnnotatedNode<Formula> annotated = logging ? annotateRoots(originalFormula) : annotate(originalFormula);
 
         // Remove bindings for unused relations/ints if this is not an

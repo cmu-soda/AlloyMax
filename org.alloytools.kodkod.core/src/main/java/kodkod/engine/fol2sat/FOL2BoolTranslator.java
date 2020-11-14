@@ -135,7 +135,10 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
         final BooleanAccumulator acc = BooleanAccumulator.treeGate(Operator.AND);
 
         for (Formula root : Nodes.conjuncts(annotated.node())) {
-            acc.add(root.accept(translator));
+            BooleanValue v = root.accept(translator);
+            if (v instanceof BooleanFormula && root.isSoft())
+                ((BooleanFormula) v).setSoft(BooleanFormula.SoftConstraint.SOFTFACT);
+            acc.add(v);
         }
         logger.close();
         return acc;
@@ -923,11 +926,11 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 break;
             case MAXSOME :
                 ret = child.some(env);
-                ((BooleanFormula) ret).setSoft(Multiplicity.MAXSOME);
+                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MAXSOME);
                 break;
             case MINSOME :
                 ret = child.some(env);
-                ((BooleanFormula) ret).setSoft(Multiplicity.MINSOME);
+                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MINSOME);
                 break;
             case ONE :
                 ret = child.one(env);

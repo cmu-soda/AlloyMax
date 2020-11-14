@@ -21,8 +21,6 @@
  */
 package kodkod.engine.bool;
 
-import kodkod.ast.operator.Multiplicity;
-
 import java.util.Iterator;
 import java.util.Set;
 
@@ -39,21 +37,23 @@ public abstract class BooleanFormula extends BooleanValue implements Iterable<Bo
 
     private BooleanFormula negation;
 
+    public enum SoftConstraint { MAXSOME, MINSOME, SOFTFACT }
+
     /**
      * This field is used to identify that this boolean formula represents a maxsome/minsome multiplicity formula.
      * Otherwise, its value should be null.
      *
      * @author Changjian Zhang
      */
-    public Multiplicity getSoft() {
+    public SoftConstraint getSoft() {
         return soft;
     }
 
-    public void setSoft(Multiplicity soft) {
+    public void setSoft(SoftConstraint soft) {
         this.soft = soft;
     }
 
-    private Multiplicity soft = null;
+    private SoftConstraint soft = null;
 
     /**
      * Constructs a boolean formula with the given negation.

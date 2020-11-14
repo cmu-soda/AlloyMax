@@ -59,6 +59,22 @@ public final class NaryFormula extends Formula implements Iterable<Formula> {
     }
 
     /**
+     * Override the setSoft function. For a nary formula, if the operator is FormulaOperator.AND, then the set
+     * function should also set all the sub-formulas as soft formulas. This is necessary when we flatten the formula.
+     * By Changjian Zhang
+     * @param soft
+     */
+    @Override
+    public void setSoft(boolean soft) {
+        super.setSoft(soft);
+        if (op == FormulaOperator.AND) {
+            for (Formula child : this) {
+                child.setSoft(soft);
+            }
+        }
+    }
+
+    /**
      * Returns the operator of this.
      *
      * @return this.op
