@@ -59,11 +59,11 @@ public final class BinaryFormula extends Formula {
      * @param soft
      */
     @Override
-    public void setSoft(boolean soft) {
-        super.setSoft(soft);
+    public void setSoft(boolean soft, int priority) {
+        super.setSoft(soft, priority);
         if (op == FormulaOperator.AND) {
-            left.setSoft(soft);
-            right.setSoft(soft);
+            left.setSoft(soft, priority);
+            right.setSoft(soft, priority);
         }
     }
 

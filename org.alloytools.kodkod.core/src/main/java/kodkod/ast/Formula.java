@@ -52,14 +52,25 @@ public abstract class Formula extends Node {
 
     Formula() {}
 
-    private boolean soft;
+    /**
+     * This field defines whether this formula is a soft constraint or not
+     */
+    private boolean soft = false;
 
     public final boolean isSoft() {
         return soft;
     }
 
-    public void setSoft(boolean soft) {
+    public void setSoft(boolean soft, int priority) {
+        assert (!soft || priority >= 0);
         this.soft = soft;
+        this.softFactPriority = priority;
+    }
+
+    private int softFactPriority = -1;
+
+    public int getSoftFactPriority() {
+        return softFactPriority;
     }
 
     /**

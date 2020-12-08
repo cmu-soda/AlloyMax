@@ -205,7 +205,7 @@ public final class Translator {
                     }
                     wcnf = (MaxSATSolver) translation.cnf();
                 }
-                wcnf.setSoftClause(new int[]{record.literal()});
+                wcnf.setSoftClause(new int[]{record.literal()}, record.translated().getSoftFactPriority());
             }
         }
     }

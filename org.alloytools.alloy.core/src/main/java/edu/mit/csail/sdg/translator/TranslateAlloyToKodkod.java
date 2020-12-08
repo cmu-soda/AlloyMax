@@ -646,7 +646,7 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
         if (y instanceof Formula) {
             // If the Alloy expression is a soft constraint, then set the Kodkod formula to soft.
             // Modified by Changjian Zhang
-            ((Formula) y).setSoft(x.isSoft());
+            ((Formula) y).setSoft(x.isSoft(), x.getSoftFactPriority());
             return (Formula) y;
         }
         throw new ErrorFatal(x.span(), "This should have been a formula.\nInstead it is " + y);

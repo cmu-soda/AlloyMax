@@ -104,8 +104,19 @@ public abstract class Expr extends Browsable {
         return soft;
     }
 
-    public void setSoft(boolean soft) {
+    public void setSoft(boolean soft, int priority) {
+        assert (!soft || priority >= 0);
         this.soft = soft;
+        this.softFactPriority = priority;
+    }
+
+    /**
+     * This field defines the maxsat priority for this soft constraint.
+     */
+    private int softFactPriority = -1;
+
+    public int getSoftFactPriority() {
+        return softFactPriority;
     }
 
     // ================================================================================================================//

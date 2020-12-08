@@ -41,7 +41,8 @@ public abstract class BooleanFormula extends BooleanValue implements Iterable<Bo
 
     /**
      * This field is used to identify that this boolean formula represents a maxsome/minsome multiplicity formula.
-     * Otherwise, its value should be null.
+     * Also, it can be SOFTFACT which indicate this formula is a soft constraint, which is used to bypass the trivial
+     * solution check in Kodkod. Otherwise, its value should be null.
      *
      * @author Changjian Zhang
      */

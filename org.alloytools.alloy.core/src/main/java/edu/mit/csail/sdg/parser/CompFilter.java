@@ -117,6 +117,12 @@ final class CompFilter implements Scanner {
                 return last = a;
             final ArrayList<Symbol> temp = new ArrayList<Symbol>();
             temp.add(b = myread());
+            // Modified by Changjian, after maxsome/minsome, it could be '[' NUMBER ']' to set the priority
+            if (b.sym == LBRACKET) {
+                temp.add(b = myread()); // [
+                temp.add(b = myread()); // NUMBER
+                temp.add(b = myread()); // ]
+            }
             if (b.sym == PRIVATE)
                 temp.add(b = myread());
             if (b.sym == DISJ || b.sym == PART || b.sym == EXH)

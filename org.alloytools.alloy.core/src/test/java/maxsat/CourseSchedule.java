@@ -297,7 +297,7 @@ public final class CourseSchedule {
         Expression x69=x7.join(x14);
         Expression x68=x69.join(x15);
         Formula x67=x68.in(x12);
-        x67.setSoft(true);  // Set ((this/Bob . this/Student.courses) . this/Course.time) in this/Afternoon to soft constraint
+        x67.setSoft(true, 0);  // Set ((this/Bob . this/Student.courses) . this/Course.time) in this/Afternoon to soft constraint
         Variable x72=Variable.unary("s");
         Decls x71=x72.oneOf(x29);
         Expression x74=x72.join(x13);

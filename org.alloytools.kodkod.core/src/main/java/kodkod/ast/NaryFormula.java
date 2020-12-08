@@ -65,11 +65,11 @@ public final class NaryFormula extends Formula implements Iterable<Formula> {
      * @param soft
      */
     @Override
-    public void setSoft(boolean soft) {
-        super.setSoft(soft);
+    public void setSoft(boolean soft, int priority) {
+        super.setSoft(soft, priority);
         if (op == FormulaOperator.AND) {
             for (Formula child : this) {
-                child.setSoft(soft);
+                child.setSoft(soft, priority);
             }
         }
     }

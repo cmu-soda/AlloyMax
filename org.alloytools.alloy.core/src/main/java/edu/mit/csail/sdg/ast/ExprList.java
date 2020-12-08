@@ -127,8 +127,8 @@ public final class ExprList extends Expr {
         if (x instanceof ExprBinary && ((ExprBinary) x).op == ExprBinary.Op.AND) {
             // Make the sub-expressions soft. Modified by Changjian Zhang.
             if (expr.isSoft()) {
-                ((ExprBinary) x).left.setSoft(true);
-                ((ExprBinary) x).right.setSoft(true);
+                ((ExprBinary) x).left.setSoft(true, expr.getSoftFactPriority());
+                ((ExprBinary) x).right.setSoft(true, expr.getSoftFactPriority());
             }
             addAND(list, ((ExprBinary) x).left);
             addAND(list, ((ExprBinary) x).right);
@@ -138,7 +138,7 @@ public final class ExprList extends Expr {
             for (Expr y : ((ExprList) x).args) {
                 // Make the sub-expressions soft. Modified by Changjian Zhang.
                 if (expr.isSoft()) {
-                    y.setSoft(true);
+                    y.setSoft(true, expr.getSoftFactPriority());
                 }
                 addAND(list, y);
             }

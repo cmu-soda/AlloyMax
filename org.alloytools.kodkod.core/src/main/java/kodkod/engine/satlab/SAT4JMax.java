@@ -16,27 +16,13 @@ import java.util.List;
  */
 final class SAT4JMax implements MaxSATSolver {
 
-    private static final class Clause {
-        private final int[] lits;
-        private boolean soft;
-
-        Clause(int[] lits, boolean soft) {
-            this.lits = lits;
-            this.soft = soft;
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(lits);
-        }
-    }
-
     private WeightedMaxSatDecorator solver;
     private final ReadOnlyIVecInt wrapper;
     private Boolean sat;
     private int vars, clauses;
     private final List<Clause> cached;
     private int cacheIdx = 0;
+    private int maxPriority = 0;
 
     /**
      * Construct a wrapper for the default maxsat solver.
@@ -71,47 +57,33 @@ final class SAT4JMax implements MaxSATSolver {
     }
 
     @Override
-    public boolean addClause(int[] lits) {
-        if (!Boolean.FALSE.equals(sat)) {
-            clauses++;
-            cached.add(new Clause(lits.clone(), false));
-            return true;
-        }
-        return false;
+    public Boolean isSAT() {
+        return sat;
     }
 
     @Override
-    public boolean addSoftClause(int[] lits) {
-        if (!Boolean.FALSE.equals(sat)) {
-            clauses++;
-            cached.add(new Clause(lits.clone(), true));
-            return true;
-        }
-        return false;
+    public void incNumberOfClauses() {
+        clauses++;
     }
 
     @Override
-    public void setSoftClause(int[] lits) {
-        for (Clause c : cached) {
-            if (Arrays.equals(c.lits, lits)) {
-                c.soft = true;
-                return;
-            }
-        }
+    public List<MaxSATSolver.Clause> getCached() {
+        return cached;
     }
 
     @Override
-    public void setHardClause(int[] lits) {
-        for (Clause c : cached) {
-            if (Arrays.equals(c.lits, lits)) {
-                c.soft = false;
-                return;
-            }
-        }
+    public int getMaxPriority() {
+        return maxPriority;
     }
 
     @Override
-    public boolean solve() {
+    public void setMaxPriority(int priority) {
+        if (priority > maxPriority)
+            maxPriority = priority;
+    }
+
+    @Override
+    public boolean actualSolve(int[] weights) {
         try {
             if (solver == null) {
                 return false;
@@ -119,10 +91,10 @@ final class SAT4JMax implements MaxSATSolver {
             if (!Boolean.FALSE.equals(sat)) {
                 while (cacheIdx < cached.size()) {
                     Clause c = cached.get(cacheIdx);
-                    if (c.soft)
-                        solver.addSoftClause(wrapper.wrap(c.lits));
+                    if (c.isSoft())
+                        solver.addSoftClause(weights[c.getPriority()], wrapper.wrap(c.getLits()));
                     else
-                        solver.addHardClause(wrapper.wrap(c.lits));
+                        solver.addHardClause(wrapper.wrap(c.getLits()));
                     cacheIdx++;
                 }
                 sat = solver.isSatisfiable();

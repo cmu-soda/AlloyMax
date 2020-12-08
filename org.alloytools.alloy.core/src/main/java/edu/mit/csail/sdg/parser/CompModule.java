@@ -1749,12 +1749,12 @@ public final class CompModule extends Browsable implements Module {
     }
 
     /** Add a soft FACT declaration. Modified by Changjian Zhang */
-    void addSoftFact(Pos pos, String name, Expr value) throws Err {
+    void addSoftFact(Pos pos, String name, Expr value, int priority) throws Err {
         status = 3;
         if (name == null || name.length() == 0)
             name = "softfact$" + (1 + facts.size());
         Expr expr = ExprUnary.Op.NOOP.make(value.span().merge(pos), value);
-        expr.setSoft(true);
+        expr.setSoft(true, priority);
         facts.add(new Pair<String,Expr>(name, expr));
     }
 
@@ -1770,7 +1770,7 @@ public final class CompModule extends Browsable implements Module {
             Expr checked = cx.check(expr);
 
             // Copy the soft state of this expression. Modified by Changjian Zhang.
-            checked.setSoft(expr.isSoft());
+            checked.setSoft(expr.isSoft(), expr.getSoftFactPriority());
 
             expr = checked.resolve_as_formula(warns);
             if (expr.errors.isEmpty()) {
