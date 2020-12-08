@@ -243,7 +243,7 @@ public final class Translator {
                 if (q.quantifier() == Quantifier.MAXSOME || q.quantifier() == Quantifier.MINSOME) {
                     final int sign = q.quantifier() == Quantifier.MAXSOME ? 1 : -1;
                     while (iter.hasNext()) {
-                        wcnf.addSoftClause(new int[]{ sign*iter.next() });
+                        wcnf.addSoftClause(new int[]{ sign*iter.next() }, q.getSomePriority());
                     }
                 }
             }

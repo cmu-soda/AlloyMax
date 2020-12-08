@@ -601,7 +601,7 @@ public final class CompModule extends Browsable implements Module {
             for (Decl d : decls.makeConst())
                 for (ExprHasName v : d.names)
                     remove(v.label);
-            return x.op.make(x.pos, x.closingBracket, decls.makeConst(), sub);
+            return x.op.make(x.pos, x.closingBracket, decls.makeConst(), sub, x.getSomePriority());
         }
 
         /** {@inheritDoc} */

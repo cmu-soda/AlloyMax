@@ -273,11 +273,15 @@ public abstract class Formula extends Node {
      * @return
      */
     public final Formula forMaxSome(Decls decls) {
-        return quantify(MAXSOME, decls);
+        Formula f = quantify(MAXSOME, decls);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
     }
 
     public final Formula forMaxSome(Decls decls, Formula domain) {
-        return quantify(MAXSOME, decls, domain);
+        Formula f = quantify(MAXSOME, decls, domain);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
     }
 
     /**
@@ -286,11 +290,15 @@ public abstract class Formula extends Node {
      * @return
      */
     public final Formula forMinSome(Decls decls) {
-        return quantify(MINSOME, decls);
+        Formula f = quantify(MINSOME, decls);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
     }
 
     public final Formula forMinSome(Decls decls, Formula domain) {
-        return quantify(MINSOME, decls, domain);
+        Formula f = quantify(MINSOME, decls, domain);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
     }
 
     /**

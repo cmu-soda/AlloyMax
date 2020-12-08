@@ -1563,6 +1563,14 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
         else
             return visitThis(xx);
         Object ans = visit_qt(x.op, x.decls, x.sub);
+
+        // Update the minsome/maxsome priority, by Changjian Zhang
+
+        if (x.op == ExprQt.Op.MAXSOME || x.op == ExprQt.Op.MINSOME) {
+            if (ans instanceof QuantifiedFormula)
+                ((QuantifiedFormula) ans).setSomePriority(x.getSomePriority());
+        }
+
         if (ans instanceof Formula)
             k2pos((Formula) ans, x);
         return ans;
