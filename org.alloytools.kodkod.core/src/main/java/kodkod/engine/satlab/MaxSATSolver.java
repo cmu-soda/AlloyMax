@@ -180,6 +180,10 @@ public interface MaxSATSolver extends SATSolver {
                 weights[i] = weights[i-1];
             else
                 weights[i] = weights[i-1] * total + 1;
+            // Test whether integer overflow has happened
+            if (weights[i] <= 0) {
+                throw new RuntimeException("The cumulative weights overflow the maximum integer");
+            }
         }
         return actualSolve(weights);
     }
