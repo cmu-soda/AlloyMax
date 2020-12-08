@@ -315,9 +315,9 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
                     // then add the inputs as soft clauses.
                     // Modified by Changjian Zhang
                     if (BooleanFormula.SoftConstraint.MAXSOME.equals(multigate.getSoft()))
-                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * -sgn));
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * -sgn), multigate.getSomePriority());
                     else if (BooleanFormula.SoftConstraint.MINSOME.equals(multigate.getSoft()))
-                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn));
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn), multigate.getSomePriority());
                 }
             }
             if (n) {

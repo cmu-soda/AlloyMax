@@ -899,14 +899,10 @@ CompareExprA ::= CompareExprB:a NOTGTE:o    ShiftExprA:b    {: RESULT=ExprBinary
 CompareExprA ::= ALL:o  ShiftExprA                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprA ::= NO:o   ShiftExprA:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
 CompareExprA ::= SOME:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
-CompareExprA ::= MAXSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
-
-CompareExprA ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
-
-CompareExprA ::= MINSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
-
-CompareExprA ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
-
+CompareExprA ::= MAXSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, 0);   :};
+CompareExprA ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, p.num);   :};
+CompareExprA ::= MINSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, 0);   :};
+CompareExprA ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, p.num);   :};
 CompareExprA ::= LONE:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprA ::= ONE:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprA ::= SET:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};
@@ -928,14 +924,10 @@ CompareExprB ::= CompareExprB:a NOTGTE:o    ShiftExprB:b    {: RESULT=ExprBinary
 CompareExprB ::= ALL:o  ShiftExprB                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprB ::= NO:o   ShiftExprB:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
 CompareExprB ::= SOME:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
-CompareExprB ::= MAXSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
-
-CompareExprB ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b);   :};
-
-CompareExprB ::= MINSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
-
-CompareExprB ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b);   :};
-
+CompareExprB ::= MAXSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, 0);   :};
+CompareExprB ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, p.num);   :};
+CompareExprB ::= MINSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, 0);   :};
+CompareExprB ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, p.num);   :};
 CompareExprB ::= LONE:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprB ::= ONE:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprB ::= SET:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};

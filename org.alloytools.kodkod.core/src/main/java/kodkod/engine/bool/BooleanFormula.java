@@ -57,6 +57,21 @@ public abstract class BooleanFormula extends BooleanValue implements Iterable<Bo
     private SoftConstraint soft = null;
 
     /**
+     * This field is used to track the priority for maxsome/minsome multiplicity formula.
+     *
+     * @author Changjian Zhang
+     */
+    public int getSomePriority() {
+        return somePriority;
+    }
+
+    public void setSomePriority(int somePriority) {
+        this.somePriority = somePriority;
+    }
+
+    private int somePriority = -1;
+
+    /**
      * Constructs a boolean formula with the given negation.
      */
     BooleanFormula(BooleanFormula negation) {

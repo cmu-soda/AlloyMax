@@ -38,6 +38,18 @@ public final class MultiplicityFormula extends Formula {
     private final Expression   expression;
     private final Multiplicity multiplicity;
 
+    /** This field is used to identify the priority for minsome/maxsome multifier */
+    private int somePriority = -1;
+
+    public int getSomePriority() {
+        return somePriority;
+    }
+
+    public void setSomePriority(int somePriority) {
+        assert (somePriority >= 0);
+        this.somePriority = somePriority;
+    }
+
     /**
      * Constructs a new multiplicity formula: multiplicity expression
      *

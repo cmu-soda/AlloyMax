@@ -927,10 +927,12 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
             case MAXSOME :
                 ret = child.some(env);
                 ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MAXSOME);
+                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
                 break;
             case MINSOME :
                 ret = child.some(env);
                 ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MINSOME);
+                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
                 break;
             case ONE :
                 ret = child.one(env);

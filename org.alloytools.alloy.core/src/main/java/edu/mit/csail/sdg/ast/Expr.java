@@ -1106,7 +1106,7 @@ public abstract class Expr extends Browsable {
      * this must be a set or a relation
      */
     public final Expr maxsome() {
-        return ExprUnary.Op.MAXSOME.make(span(), this);
+        return ExprUnary.Op.MAXSOME.make(span(), this, 0);
     }
 
     /**
@@ -1115,7 +1115,7 @@ public abstract class Expr extends Browsable {
      * this must be a set or a relation
      */
     public final Expr minsome() {
-        return ExprUnary.Op.MINSOME.make(span(), this);
+        return ExprUnary.Op.MINSOME.make(span(), this, 0);
     }
 
     /**

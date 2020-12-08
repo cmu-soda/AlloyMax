@@ -55,17 +55,7 @@ import edu.mit.csail.sdg.ast.Sig;
 import edu.mit.csail.sdg.ast.Sig.Field;
 import edu.mit.csail.sdg.ast.Type;
 import edu.mit.csail.sdg.ast.VisitReturn;
-import kodkod.ast.BinaryExpression;
-import kodkod.ast.Decls;
-import kodkod.ast.ExprToIntCast;
-import kodkod.ast.Expression;
-import kodkod.ast.Formula;
-import kodkod.ast.IntConstant;
-import kodkod.ast.IntExpression;
-import kodkod.ast.IntToExprCast;
-import kodkod.ast.QuantifiedFormula;
-import kodkod.ast.Relation;
-import kodkod.ast.Variable;
+import kodkod.ast.*;
 import kodkod.ast.operator.ExprOperator;
 import kodkod.engine.CapacityExceededException;
 import kodkod.engine.fol2sat.HigherOrderDeclException;
@@ -841,9 +831,13 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
             case SOME :
                 return k2pos(cset(x.sub).some(), x);
             case MAXSOME :
-                return k2pos(cset(x.sub).maxSome(), x);
+                Formula f_max = k2pos(cset(x.sub).maxSome(), x);
+                ((MultiplicityFormula) f_max).setSomePriority(x.getSomePriority());
+                return f_max;
             case MINSOME :
-                return k2pos(cset(x.sub).minSome(), x);
+                Formula f_min = k2pos(cset(x.sub).minSome(), x);
+                ((MultiplicityFormula) f_min).setSomePriority(x.getSomePriority());
+                return f_min;
             case LONE :
                 return k2pos(cset(x.sub).lone(), x);
             case ONE :
