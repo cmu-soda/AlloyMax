@@ -1,6 +1,7 @@
 package kodkod.engine.satlab;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -169,10 +170,18 @@ public interface MaxSATSolver extends SATSolver {
         int[] weights = new int[getMaxPriority()+1];
         Arrays.fill(weights, -1);
         weights[0] = 1;
+
+        // Find all the soft clauses
+        List<Clause> softclauses = new LinkedList<>();
+        for (Clause c : getCached()) {
+            if (c.isSoft())
+                softclauses.add(c);
+        }
+
         for (int i = 1; i <= getMaxPriority(); i++) {
             // Compute the total value for the previous priority
             int total = 0;
-            for (Clause c : getCached()) {
+            for (Clause c : softclauses) {
                 if (c.priority == i - 1)
                     total++;
             }
