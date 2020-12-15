@@ -9,10 +9,10 @@ import java.util.List;
  */
 public interface MaxSATSolver extends SATSolver {
 
-    final class Clause {
-        private final int[] lits;
-        private boolean soft;
-        private int priority;
+    class Clause {
+        protected final int[] lits;
+        protected boolean soft;
+        protected int priority;
 
         public int[] getLits() {
             return lits;

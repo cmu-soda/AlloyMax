@@ -34,6 +34,7 @@ import kodkod.engine.bool.MultiGate;
 import kodkod.engine.bool.NotGate;
 import kodkod.engine.bool.Operator;
 import kodkod.engine.satlab.MaxSATSolver;
+import kodkod.engine.satlab.PMaxSatSolver;
 import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.util.ints.IntSet;
@@ -282,7 +283,12 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
     @Override
     public final int[] visit(MultiGate multigate, Object arg) {
         if (multigate.getSoft() != null && !(solver instanceof MaxSATSolver)) {
-            throw new IllegalStateException("To use maxsome/minsome, the solver should be a MaxSAT solver!");
+            throw new IllegalStateException("To use maxsome/minsome multiplicity operator, the solver should be a MaxSAT solver!");
+        }
+        // For partitioning MaxSAT solver, create a new group for this maxsome/minsome multiplicity formula.
+        // By Changjian Zhang
+        if (multigate.getSoft() != null && solver instanceof PMaxSatSolver) {
+            ((PMaxSatSolver) solver).addGroup();
         }
 
         final int oLit = multigate.label();

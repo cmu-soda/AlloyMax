@@ -12,8 +12,8 @@ import java.util.List;
 
 class WriteWCNF implements MaxSATSolver {
 
-    private static final String TOP = "1000000000000";
-    private final List<Clause> cached = new LinkedList<>();
+    protected static final String TOP = "1000000000000";
+    protected final List<Clause> cached = new LinkedList<>();
     private int maxPriority = 0;
 
     /** This is the CNF file we are generating. */
@@ -54,17 +54,11 @@ class WriteWCNF implements MaxSATSolver {
         };
     }
 
-    private WriteWCNF(String filename) {
+    protected WriteWCNF(String filename) {
         try {
             this.cnf = new RandomAccessFile(filename, "rw");
             this.cnf.setLength(0);
             this.buffer = new StringBuilder(capacity);
-            for (int i = String.valueOf(Integer.MAX_VALUE).length() * 3 + 20; i > 0; i--) {
-                // get enough space into the buffer for the cnf header, which
-                // will be written last
-                buffer.append(' ');
-            }
-            buffer.append('\n');
         } catch (Exception ex) {
             throw new RuntimeException("WriteWCNF failed.", ex);
         }
@@ -116,6 +110,7 @@ class WriteWCNF implements MaxSATSolver {
     @Override
     public boolean actualSolve(int[] weights) {
         try {
+            cnf.writeBytes("p wcnf " + vars + " " + clauses + " " + TOP + "\n");
             for (Clause c : cached) {
                 if (buffer.length() > capacity)
                     flush();
@@ -131,11 +126,9 @@ class WriteWCNF implements MaxSATSolver {
             }
 
             flush();
-            cnf.seek(0);
-            cnf.writeBytes("p wcnf " + vars + " " + clauses + " " + TOP);
             cnf.close();
         } catch (Exception ex) {
-            throw new RuntimeException("WriteCNF failed.", ex);
+            throw new RuntimeException("WriteWCNF failed.", ex);
         }
         throw new WriteCNF.WriteCNFCompleted();
     }

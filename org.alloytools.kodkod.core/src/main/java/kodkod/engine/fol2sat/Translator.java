@@ -30,6 +30,7 @@ import kodkod.engine.hol.HOLTranslation;
 import kodkod.engine.hol.HOLTranslator;
 import kodkod.engine.hol.Proc;
 import kodkod.engine.satlab.MaxSATSolver;
+import kodkod.engine.satlab.PMaxSatSolver;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
@@ -177,7 +178,7 @@ public final class Translator {
     }
 
     /**
-     *
+     * FIXME: we can identify soft facts in the translation phase, not after translation.
      * @param translation
      */
     private static void makeSoftFacts(Formula formula, Translation.Whole translation) {
@@ -205,6 +206,10 @@ public final class Translator {
                     }
                     wcnf = (MaxSATSolver) translation.cnf();
                 }
+                // If this is a PWCNF, create a new group for each soft fact
+                if (wcnf instanceof PMaxSatSolver) {
+                    ((PMaxSatSolver) wcnf).addGroup();
+                }
                 wcnf.setSoftClause(new int[]{record.literal()}, record.translated().getSoftFactPriority());
             }
         }
@@ -221,7 +226,7 @@ public final class Translator {
         final MaximalityQuantifierFinder quantFinder = new MaximalityQuantifierFinder(new HashSet<>());
         final Set<QuantifiedFormula> quantified = formula.accept(quantFinder);
 
-        // No maxsome or minsome are used in the formula
+        // No maxsome or minsome quantifier are used in the formula
         if (quantified.size() == 0) {
             return;
         }
@@ -241,6 +246,10 @@ public final class Translator {
                 }
                 final IntIterator iter = vars.iterator();
                 if (q.quantifier() == Quantifier.MAXSOME || q.quantifier() == Quantifier.MINSOME) {
+                    // If this is a PWCNF, create a new group for this maxsome/minsome quantified relation
+                    if (wcnf instanceof PMaxSatSolver) {
+                        ((PMaxSatSolver) wcnf).addGroup();
+                    }
                     final int sign = q.quantifier() == Quantifier.MAXSOME ? 1 : -1;
                     while (iter.hasNext()) {
                         wcnf.addSoftClause(new int[]{ sign*iter.next() }, q.getSomePriority());

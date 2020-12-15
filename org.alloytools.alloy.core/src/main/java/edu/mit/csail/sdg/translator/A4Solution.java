@@ -1380,7 +1380,7 @@ public final class A4Solution {
                     rep.solve(primaryVars, vars, clauses);
             }
         });
-        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.WCNF)
+        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.WCNF) && !opt.solver.equals(SatSolver.PWCNF)
                 && !opt.solver.equals(SatSolver.KK) && tryBookExamples) { // try
                                                                           // book
                                                                           // examples
@@ -1405,15 +1405,21 @@ public final class A4Solution {
             rep.resultCNF(out);
             return null;
         }
-        if (opt.solver.equals(SatSolver.CNF) || opt.solver.equals(SatSolver.WCNF)) {
+        if (opt.solver.equals(SatSolver.CNF) || opt.solver.equals(SatSolver.WCNF) || opt.solver.equals(SatSolver.PWCNF)) {
             File tmpCNF = opt.solver.equals(SatSolver.CNF) ?
                     File.createTempFile("tmp", ".cnf", new File(opt.tempDirectory)) :
-                    File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                    (opt.solver.equals(SatSolver.WCNF) ?
+                            File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory)) :
+                            File.createTempFile("tmp", ".pwcnf", new File(opt.tempDirectory)));
             String out = tmpCNF.getAbsolutePath();
             if (opt.solver.equals(SatSolver.CNF))
                 solver.options().setSolver(WriteCNF.factory(out));
-            else {
+            else if (opt.solver.equals(SatSolver.WCNF)) {
                 solver.options().setSolver(WriteWCNF.factory(out));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } else {
+                solver.options().setSolver(WritePWCNF.factory(out));
                 solver.options().setLogTranslation(2);
                 solver.options().setCoreGranularity(opt.coreGranularity);
             }
