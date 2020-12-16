@@ -37,14 +37,47 @@ public class OpenWBOCLI {
         }
 
         A4Reporter rep = new A4Reporter() {
+
+            private long lastTime = 0;
+            private long startTime = 0;
+
+            @Override
+            public void translate(String solver, int bitwidth, int maxseq, int skolemDepth, int symmetry) {
+                System.out.println("Solver: " + solver + ", bitwidth: " + bitwidth + ", maxseq: " + maxseq + ", skolemdepth: " + skolemDepth + " symmetry: " + symmetry);
+                startTime = lastTime = System.currentTimeMillis();
+            }
+
             @Override
             public void warning(ErrorWarning msg) {
-                System.err.println(msg);
+                System.out.println(msg.getMessage());
+            }
+
+            @Override
+            public void solve(int primaryVars, int totalVars, int clauses) {
+                System.out.println("CNF generated. Primary vars: " + primaryVars + ", Total variables: " + totalVars + ", Total clauses: " + clauses + ". " + (System.currentTimeMillis() - lastTime) + "ms.");
+                lastTime = System.currentTimeMillis();
+            }
+
+            @Override
+            public void resultSAT(Object command, long solvingTime, Object solution) {
+                long t = System.currentTimeMillis();
+                System.out.println("Solved: SAT, time: " + (t - lastTime) + "ms.");
+                System.out.println("Total time: " + (t - startTime) + "ms.");
+            }
+
+            @Override
+            public void resultUNSAT(Object command, long solvingTime, Object solution) {
+                long t = System.currentTimeMillis();
+                System.out.println("Solved: UNSAT, time: " + (t - lastTime) + "ms.");
+                System.out.println("Total time: " + (t - startTime) + "ms.");
             }
         };
 
         Module world = CompUtil.parseEverything_fromFile(rep, null, filename);
         A4Options options = new A4Options();
+        options.skolemDepth = 1;
+        options.noOverflow = true;
+        options.inferPartialInstance = false;
         if (partitions)
             options.solver = A4Options.SatSolver.POpenWBO;
         else
