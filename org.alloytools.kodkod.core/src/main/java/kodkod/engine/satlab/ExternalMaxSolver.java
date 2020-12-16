@@ -126,6 +126,11 @@ public class ExternalMaxSolver implements MaxSATSolver {
                                 sat = Boolean.FALSE;
                                 continue;
                             }
+                        } else if (tlength == 3) {
+                            if (tokens[1].compareToIgnoreCase("OPTIMUM") == 0 && tokens[2].compareToIgnoreCase("FOUND") == 0) {
+                                sat = Boolean.TRUE;
+                                continue;
+                            }
                         }
                         throw new SATAbortedException("Invalid " + executable + " output. Line: " + line);
                     } else if (tokens[0].compareToIgnoreCase("v") == 0) {

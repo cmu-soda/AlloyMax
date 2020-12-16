@@ -284,7 +284,7 @@ public abstract class SATFactory {
                 final String executable = findStaticLibrary("open-wbo");
                 if (executable == null)
                     throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
-                return new ExternalMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
+                return new ExternalPMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
             }
 
             @Override
