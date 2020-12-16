@@ -385,6 +385,24 @@ public final class A4Solution {
             solver.options().setSolver(SATFactory.DefaultSAT4JMax);
             solver.options().setLogTranslation(2);
             solver.options().setCoreGranularity(opt.coreGranularity);
+        } else if (opt.solver.equals(SatSolver.OpenWBO)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.OpenWBO(tmp.getAbsolutePath()));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
+        } else if (opt.solver.equals(SatSolver.POpenWBO)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".pwcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.POpenWBO(tmp.getAbsolutePath()));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
         } else {
             solver.options().setSolver(SATFactory.DefaultSAT4J); // Even for
                                                                 // "KK" and

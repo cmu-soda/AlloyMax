@@ -246,6 +246,60 @@ public abstract class SATFactory {
                                                  };
 
     /**
+     *
+     * @param filename
+     * @return
+     */
+    public static SATFactory OpenWBO(String filename) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                return new ExternalMaxSolver(executable, filename, "-formula=0", "-algorithm=2");
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO";
+            }
+        };
+    }
+
+    /**
+     *
+     * @param filename
+     * @return
+     */
+    public static SATFactory POpenWBO(String filename) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                return new ExternalMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO with partitions";
+            }
+        };
+    }
+
+    /**
      * Returns a SATFactory that produces SATSolver wrappers for Armin Biere's
      * Plingeling solver. This is a parallel solver that is invoked as an external
      * program rather than via the Java Native Interface. As a result, it cannot be
