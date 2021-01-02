@@ -873,6 +873,9 @@ public final class TranslateKodkodToJava implements VoidVisitor {
             case NO :
                 file.printf("Formula %s=%s.no();%n", newname, sub);
                 break;
+            case SOFTNO :
+                file.printf("Formula %s=%s.softno();%n", newname, sub);
+                break;
             default :
                 throw new RuntimeException("Unknown kodkod multiplicity \"" + x.multiplicity() + "\" encountered");
         }

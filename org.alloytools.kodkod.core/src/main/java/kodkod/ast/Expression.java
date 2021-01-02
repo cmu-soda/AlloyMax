@@ -435,6 +435,17 @@ public abstract class Expression extends Node {
     }
 
     /**
+     * Returns the formula 'softno this'. The effect of this method is the same as
+     * calling this.apply(SOFTNO).
+     *
+     * @return this.apply(SOFTNO)
+     * @author Changjian Zhang
+     */
+    public final Formula softno() {
+        return apply(SOFTNO);
+    }
+
+    /**
      * Returns the formula 'one this'. The effect of this method is the same as
      * calling this.apply(ONE).
      *

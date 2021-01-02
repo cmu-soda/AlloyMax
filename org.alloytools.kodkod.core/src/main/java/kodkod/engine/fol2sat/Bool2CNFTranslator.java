@@ -283,7 +283,7 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
     @Override
     public final int[] visit(MultiGate multigate, Object arg) {
         if (multigate.getSoft() != null && !(solver instanceof MaxSATSolver)) {
-            throw new IllegalStateException("To use maxsome/minsome multiplicity operator, the solver should be a MaxSAT solver!");
+            throw new IllegalStateException("To use maxsome/minsome/softno multiplicity operator, the solver should be a MaxSAT solver!");
         }
         // For partitioning MaxSAT solver, create a new group for this maxsome/minsome multiplicity formula.
         // By Changjian Zhang
@@ -310,7 +310,16 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
             for (BooleanFormula input : multigate) {
                 int iLit = input.accept(this, arg)[0];
                 if (p) {
-                    solver.addClause(clause(iLit * sgn, output));
+                    if (BooleanFormula.SoftConstraint.SOFTNO.equals(multigate.getSoft())) {
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn, output), multigate.getSomePriority());
+                        // If this formula is a softno x (where x is a relation) formula, then add additional
+                        // semantics to each tuple in relation x.
+                        if (input instanceof MultiGate) {
+                            additionalSemantics((MultiGate) input, arg);
+                        }
+                    } else {
+                        solver.addClause(clause(iLit * sgn, output));
+                    }
                 }
                 if (n) {
                     lastClause[i++] = iLit * -sgn;

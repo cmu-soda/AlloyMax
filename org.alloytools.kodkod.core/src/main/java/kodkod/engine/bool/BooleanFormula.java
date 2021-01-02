@@ -37,7 +37,7 @@ public abstract class BooleanFormula extends BooleanValue implements Iterable<Bo
 
     private BooleanFormula negation;
 
-    public enum SoftConstraint { MAXSOME, MINSOME, SOFTFACT }
+    public enum SoftConstraint { MAXSOME, MINSOME, SOFTFACT, SOFTNO }
 
     /**
      * This field is used to identify that this boolean formula represents a maxsome/minsome multiplicity formula.

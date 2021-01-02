@@ -203,6 +203,7 @@ import java_cup.runtime.*;
 "none"                { return alloy_sym(yytext(), CompSym.NONE        );}
 "not"                 { return alloy_sym(yytext(), CompSym.NOT         );}
 "no"                  { return alloy_sym(yytext(), CompSym.NO          );}
+"softno"              { return alloy_sym(yytext(), CompSym.SOFTNO      );}
 "one"                 { return alloy_sym(yytext(), CompSym.ONE         );}
 "open"                { return alloy_sym(yytext(), CompSym.OPEN        );}
 "or"                  { return alloy_sym(yytext(), CompSym.OR          );}

@@ -834,6 +834,8 @@ public final class SimInstance extends VisitReturn<Object> {
                 return trunc(cset(x.sub).size());
             case NO :
                 return cset(x.sub).empty();
+            case SOFTNO:
+                return true;    // SOFTNO should always be satisfied, by Changjian Zhang
             case LONE :
                 return cset(x.sub).longsize() <= 1;
             case ONE :

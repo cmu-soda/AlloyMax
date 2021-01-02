@@ -167,6 +167,8 @@ public final class ExprUnary extends Expr {
                     NOT("!"),
                     /** no x (where x is a set or relation) */
                     NO("no"),
+                    /** softno x (where x is a set or relation) */
+                    SOFTNO("softno"),
                     /** some x (where x is a set or relation) */
                     SOME("some"),
                     /** maxsome x (where x is a set or relation) */
@@ -322,6 +324,7 @@ public final class ExprUnary extends Expr {
                         break;
                     case NOT :
                     case NO :
+                    case SOFTNO:
                     case SOME :
                     case MAXSOME :
                     case MINSOME :
@@ -399,6 +402,7 @@ public final class ExprUnary extends Expr {
                 break;
             case CARDINALITY :
             case NO :
+            case SOFTNO:
             case ONE :
             case SOME :
             case MAXSOME :

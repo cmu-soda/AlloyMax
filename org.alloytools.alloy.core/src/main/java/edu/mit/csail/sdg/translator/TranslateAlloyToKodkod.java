@@ -844,6 +844,10 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
                 return k2pos(cset(x.sub).one(), x);
             case NO :
                 return k2pos(cset(x.sub).no(), x);
+            case SOFTNO:
+                Formula f_softno = k2pos(cset(x.sub).softno(), x);
+                ((MultiplicityFormula) f_softno).setSomePriority(x.getSomePriority());
+                return f_softno;
             case TRANSPOSE :
                 return cset(x.sub).transpose();
             case CARDINALITY :
