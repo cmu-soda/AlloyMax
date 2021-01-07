@@ -372,7 +372,7 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
         int i = 0;
         for (BooleanFormula input : multigate) {
             int iLit;
-            if (input instanceof BooleanVariable) {
+            if (input instanceof BooleanVariable || input instanceof NotGate) {
                 iLit = input.accept(this, arg)[0];
             } else if (input instanceof MultiGate) {
                 iLit = additionalSemantics((MultiGate) input, arg)[0];
