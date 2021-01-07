@@ -91,10 +91,14 @@ final class SAT4JMax implements MaxSATSolver {
             if (!Boolean.FALSE.equals(sat)) {
                 while (cacheIdx < cached.size()) {
                     Clause c = cached.get(cacheIdx);
-                    if (c.isSoft())
-                        solver.addSoftClause(weights[c.getPriority()], wrapper.wrap(c.getLits()));
-                    else
+                    if (c.isSoft()) {
+                        if (c.getLits().length == 1)
+                            solver.addSoftClause(weights[c.getPriority()], wrapper.wrap(c.getLits()));
+                        else
+                            throw new IllegalStateException("SAT4J-MAXSAT does not support non-unit soft clauses");
+                    } else {
                         solver.addHardClause(wrapper.wrap(c.getLits()));
+                    }
                     cacheIdx++;
                 }
                 sat = solver.isSatisfiable();
