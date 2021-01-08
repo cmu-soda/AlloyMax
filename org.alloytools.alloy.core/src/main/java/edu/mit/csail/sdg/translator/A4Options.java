@@ -185,6 +185,8 @@ public final class A4Options implements Serializable {
         public static final SatSolver SAT4J            = new SatSolver("sat4j", "SAT4J", null, null, true);
         /** SAT4JMax using native Java */
         public static final SatSolver SAT4JMax         = new SatSolver("sat4jmax", "SAT4JMax", null, null, true);
+        /** Open-wbo maxsat solver weighted */
+        public static final SatSolver OpenWBOWeighted  = new SatSolver("open-wbo weighted", "OpenWBO Weighted", null, null, true);
         /** Open-wbo maxsat solver */
         public static final SatSolver OpenWBO          = new SatSolver("open-wbo", "OpenWBO", null, null, true);
         /** Open-wbo with partitions maxsat solver */

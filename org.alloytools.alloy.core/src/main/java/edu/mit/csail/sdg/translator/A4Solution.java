@@ -394,6 +394,15 @@ public final class A4Solution {
             } catch (IOException e) {
                 throw new ErrorFatal("Cannot create temporary directory.", e);
             }
+        } else if (opt.solver.equals(SatSolver.OpenWBOWeighted)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.OpenWBOWeighted(tmp.getAbsolutePath()));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
         } else if (opt.solver.equals(SatSolver.POpenWBO)) {
             try {
                 File tmp = File.createTempFile("tmp", ".pwcnf", new File(opt.tempDirectory));

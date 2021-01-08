@@ -250,6 +250,33 @@ public abstract class SATFactory {
      * @param filename
      * @return
      */
+    public static SATFactory OpenWBOWeighted(String filename) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                return new ExternalMaxSolver(executable, filename);
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO Weighted";
+            }
+        };
+    }
+
+    /**
+     *
+     * @param filename
+     * @return
+     */
     public static SATFactory OpenWBO(String filename) {
         return new SATFactory() {
             @Override
