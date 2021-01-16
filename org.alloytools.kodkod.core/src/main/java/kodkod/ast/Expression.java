@@ -407,9 +407,7 @@ public abstract class Expression extends Node {
      * @return this.apply(MAXSOME)
      */
     public final Formula maxSome() {
-        Formula f = apply(MAXSOME);
-        ((MultiplicityFormula) f).setSomePriority(0);
-        return f;
+        return apply(MAXSOME);
     }
 
     /**
@@ -419,9 +417,7 @@ public abstract class Expression extends Node {
      * @return this.apply(MINSOME)
      */
     public final Formula minSome() {
-        Formula f = apply(MINSOME);
-        ((MultiplicityFormula) f).setSomePriority(0);
-        return f;
+        return apply(MINSOME);
     }
 
     /**
@@ -477,7 +473,10 @@ public abstract class Expression extends Node {
      * @throws IllegalArgumentException mult = SET
      */
     public final Formula apply(Multiplicity mult) {
-        return new MultiplicityFormula(mult, this);
+        MultiplicityFormula f = new MultiplicityFormula(mult, this);
+        if (MAXSOME.equals(mult) || MINSOME.equals(mult) || SOFTNO.equals(mult))
+            f.setSomePriority(0);
+        return f;
     }
 
     /**

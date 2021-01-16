@@ -686,6 +686,8 @@ public abstract class AbstractReplacer implements ReturnVisitor<Expression,Formu
 
         final Expression expression = multFormula.expression().accept(delegate);
         ret = (expression == multFormula.expression()) ? multFormula : expression.apply(multFormula.multiplicity());
+        // Inherit the multiplicity priority from the original formula, by Changjian Zhang
+        ((MultiplicityFormula) ret).setSomePriority(multFormula.getSomePriority());
         return cache(multFormula, ret);
     }
 
