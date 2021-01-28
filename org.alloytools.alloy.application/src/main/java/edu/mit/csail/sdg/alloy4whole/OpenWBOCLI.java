@@ -8,9 +8,6 @@ import edu.mit.csail.sdg.parser.CompUtil;
 import edu.mit.csail.sdg.translator.A4Options;
 import edu.mit.csail.sdg.translator.A4Solution;
 import edu.mit.csail.sdg.translator.TranslateAlloyToKodkod;
-import kodkod.engine.Solver;
-
-import java.lang.reflect.Field;
 
 public class OpenWBOCLI {
 
