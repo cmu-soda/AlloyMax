@@ -22,6 +22,7 @@ public class BenchmarkMain {
     private final String maxsatFilename;
 //    private final List<String> exprs;
 //    private List<Object> evals;
+    private volatile int instCount = 0;
 
     BenchmarkMain(String sat, String maxsat) {
         this.satFilename = sat;
@@ -45,8 +46,8 @@ public class BenchmarkMain {
         A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
     }
 
-    public void solveMaxSat() {
-        A4Reporter rep = new A4Reporter() {};
+    public void solveMaxSat(long startTime) {
+        A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
 
         A4Options options = new A4Options();
@@ -72,10 +73,10 @@ public class BenchmarkMain {
 //        }
     }
 
-    public void solveMaxSatPartition() {
+    public void solveMaxSatPartition(long startTime) {
 //        assert (evals != null);
 
-        A4Reporter rep = new A4Reporter() {};
+        A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
 
         A4Options options = new A4Options();
@@ -98,10 +99,10 @@ public class BenchmarkMain {
 //        }
     }
 
-    public void solveSatEnum() {
+    public void solveSatEnum(long startTime) {
 //        assert (evals != null);
 
-        A4Reporter rep = new A4Reporter() {};
+        A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, satFilename);
 
         A4Options options = new A4Options();
@@ -110,14 +111,13 @@ public class BenchmarkMain {
         options.inferPartialInstance = false;
         options.solver = A4Options.SatSolver.Glucose41JNI;
 
-        int count = 0;
         Command c = world.getAllCommands().get(0);
         A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
         while (ans.satisfiable()) {
             ans = ans.next();
-            count++;
+            ++instCount;
         }
-        System.out.println("Enumeration number: " + count);
+        System.out.println("Enumeration number: " + instCount);
 //        boolean optimal = false;
 //        while (!optimal) {
 //            for (ExprVar a : ans.getAllAtoms())
@@ -140,14 +140,17 @@ public class BenchmarkMain {
 //        }
     }
 
-    private class MyRep extends A4Reporter {
-        private long lastTime = 0;
+    private static class MyRep extends A4Reporter {
+        private long startSolveTime = 0;
         private long startTime = 0;
+
+        MyRep(long startTime) {
+            this.startTime = startTime;
+        }
 
         @Override
         public void translate(String solver, int bitwidth, int maxseq, int skolemDepth, int symmetry) {
             System.out.println("Solver: " + solver + ", bitwidth: " + bitwidth + ", maxseq: " + maxseq + ", skolemdepth: " + skolemDepth + " symmetry: " + symmetry);
-            startTime = lastTime = System.currentTimeMillis();
         }
 
         @Override
@@ -157,22 +160,24 @@ public class BenchmarkMain {
 
         @Override
         public void solve(int primaryVars, int totalVars, int clauses) {
-            System.out.println("CNF generated. Primary vars: " + primaryVars + ", Total variables: " + totalVars + ", Total clauses: " + clauses + ". " + (System.currentTimeMillis() - lastTime) + "ms.");
-            lastTime = System.currentTimeMillis();
+            long transTime = System.currentTimeMillis() - startTime;
+            System.out.println("CNF generated. Primary vars: " + primaryVars + ", Total variables: " + totalVars + ", Total clauses: " + clauses);
+            System.out.println("Translation time: " + transTime);
+            startSolveTime = System.currentTimeMillis();
         }
 
         @Override
         public void resultSAT(Object command, long solvingTime, Object solution) {
-            long t = System.currentTimeMillis();
-            System.out.println("Solved: SAT, time: " + (t - lastTime) + "ms.");
-            System.out.println("Total time: " + (t - startTime) + "ms.");
+            long solveTime = System.currentTimeMillis() - startSolveTime;
+            System.out.println("Solved: SAT");
+            System.out.println("Solve time: " + solveTime);
         }
 
         @Override
         public void resultUNSAT(Object command, long solvingTime, Object solution) {
-            long t = System.currentTimeMillis();
-            System.out.println("Solved: UNSAT, time: " + (t - lastTime) + "ms.");
-            System.out.println("Total time: " + (t - startTime) + "ms.");
+            long solveTime = System.currentTimeMillis() - startSolveTime;
+            System.out.println("Solved: UNSAT");
+            System.out.println("Solve time: " + solveTime);
         }
     }
 
@@ -204,26 +209,26 @@ public class BenchmarkMain {
         if (sat == null && maxsat == null /*|| exprs.isEmpty() */)
             printUsage();
 
-        BenchmarkMain benchmark = new BenchmarkMain(sat, maxsat);
+        final BenchmarkMain benchmark = new BenchmarkMain(sat, maxsat);
         if (sat != null) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("Enumeration number: " + benchmark.instCount)));
             // Enumerating Sat problem
             long startTime = System.currentTimeMillis();
             System.out.println("=============================\nEnumerate the Sat problem to get all solutions...");
-            benchmark.solveSatEnum();
-            System.out.println("Enumeration time: " + (System.currentTimeMillis() - startTime));
+            benchmark.solveSatEnum(startTime);
+            System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
         }
 
         if (maxsat != null) {
             long startTime = System.currentTimeMillis();
             if (partition) {
                 System.out.println("=============================\nSolve the MaxSat problem with partitions...");
-                benchmark.solveMaxSatPartition();
-                System.out.println("MaxSat-Partition time: " + (System.currentTimeMillis() - startTime));
+                benchmark.solveMaxSatPartition(startTime);
             } else {
                 System.out.println("=============================\nSolve the MaxSat problem...");
-                benchmark.solveMaxSat();
-                System.out.println("MaxSat time: " + (System.currentTimeMillis() - startTime));
+                benchmark.solveMaxSat(startTime);
             }
+            System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
         }
     }
 
