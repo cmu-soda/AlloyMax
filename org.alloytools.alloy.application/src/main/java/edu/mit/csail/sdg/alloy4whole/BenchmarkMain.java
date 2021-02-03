@@ -32,14 +32,19 @@ public class BenchmarkMain {
         coldstart();
     }
 
+    private A4Options myOption() {
+        A4Options options = new A4Options();
+        options.skolemDepth = 1;
+        options.noOverflow = false;
+        options.inferPartialInstance = true;
+        return options;
+    }
+
     private void coldstart() {
         A4Reporter rep = new A4Reporter() {};
         Module world = CompUtil.parseEverything_fromString(rep, "");
 
-        A4Options options = new A4Options();
-        options.skolemDepth = 1;
-        options.noOverflow = true;
-        options.inferPartialInstance = false;
+        A4Options options = myOption();
         options.solver = A4Options.SatSolver.Glucose41JNI;
 
         Command c = world.getAllCommands().get(0);
@@ -50,10 +55,7 @@ public class BenchmarkMain {
         A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
 
-        A4Options options = new A4Options();
-        options.skolemDepth = 1;
-        options.noOverflow = true;
-        options.inferPartialInstance = false;
+        A4Options options = myOption();
         options.solver = A4Options.SatSolver.OpenWBO;
 
         Command c = world.getAllCommands().get(0);
@@ -79,10 +81,7 @@ public class BenchmarkMain {
         A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
 
-        A4Options options = new A4Options();
-        options.skolemDepth = 1;
-        options.noOverflow = true;
-        options.inferPartialInstance = false;
+        A4Options options = myOption();
         options.solver = A4Options.SatSolver.POpenWBO;
 
         Command c = world.getAllCommands().get(0);
@@ -105,10 +104,7 @@ public class BenchmarkMain {
         A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, satFilename);
 
-        A4Options options = new A4Options();
-        options.skolemDepth = 1;
-        options.noOverflow = true;
-        options.inferPartialInstance = false;
+        A4Options options = myOption();
         options.solver = A4Options.SatSolver.Glucose41JNI;
 
         Command c = world.getAllCommands().get(0);
