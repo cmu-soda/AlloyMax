@@ -168,7 +168,7 @@ public interface MaxSATSolver extends SATSolver {
     default boolean solve() throws SATAbortedException {
         // Compute the actual weight for each priority, the default priority 0 has weight 1
         int[] weights = new int[getMaxPriority()+1];
-        Arrays.fill(weights, -1);
+        int[] totals = new int[getMaxPriority()+1];
         weights[0] = 1;
 
         // Find all the soft clauses
@@ -185,10 +185,14 @@ public interface MaxSATSolver extends SATSolver {
                 if (c.priority == i - 1)
                     total++;
             }
-            if (total == 0) // the i-1 priority is empty
-                weights[i] = weights[i-1];
-            else
-                weights[i] = weights[i-1] * total + 1;
+            totals[i-1] = total;
+
+            weights[i] = 0;
+            for (int j = 0; j < i; j++) {
+                weights[i] += weights[j] * totals[j];
+            }
+            weights[i]++;
+
             // Test whether integer overflow has happened
             if (weights[i] <= 0) {
                 throw new RuntimeException("The cumulative weights overflow the maximum integer");
