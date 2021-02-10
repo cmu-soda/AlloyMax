@@ -75,14 +75,17 @@ public class BenchmarkMain {
 //        }
     }
 
-    public void solveMaxSatPartition(long startTime) {
+    public void solveMaxSatPartition(long startTime, boolean auto) {
 //        assert (evals != null);
 
         A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
 
         A4Options options = myOption();
-        options.solver = A4Options.SatSolver.POpenWBO;
+        if (auto)
+            options.solver = A4Options.SatSolver.POpenWBOAuto;
+        else
+            options.solver = A4Options.SatSolver.POpenWBO;
 
         Command c = world.getAllCommands().get(0);
         A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
@@ -178,7 +181,7 @@ public class BenchmarkMain {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -p");
+        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -p -auto");
         System.exit(-1);
     }
 
@@ -186,6 +189,7 @@ public class BenchmarkMain {
         String sat = null;
         String maxsat = null;
         boolean partition = false;
+        boolean autoPartition = false;
 //        List<String> exprs = new LinkedList<>();
 
         for (String arg : args) {
@@ -198,6 +202,8 @@ public class BenchmarkMain {
                 maxsat = arg.substring(8);
             else if (arg.equals("-p"))
                 partition = true;
+            else if (arg.equals("-auto"))
+                autoPartition = true;
             else
                 printUsage();
         }
@@ -219,7 +225,7 @@ public class BenchmarkMain {
             long startTime = System.currentTimeMillis();
             if (partition) {
                 System.out.println("=============================\nSolve the MaxSat problem with partitions...");
-                benchmark.solveMaxSatPartition(startTime);
+                benchmark.solveMaxSatPartition(startTime, autoPartition);
             } else {
                 System.out.println("=============================\nSolve the MaxSat problem...");
                 benchmark.solveMaxSat(startTime);

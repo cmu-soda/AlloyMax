@@ -191,6 +191,8 @@ public final class A4Options implements Serializable {
         public static final SatSolver OpenWBO          = new SatSolver("open-wbo", "OpenWBO", null, null, true);
         /** Open-wbo with partitions maxsat solver */
         public static final SatSolver POpenWBO         = new SatSolver("open-wbo partitions", "OpenWBO with partitions", null, null, true);
+        /** Open-wbo with auto-partitions maxsat solver */
+        public static final SatSolver POpenWBOAuto     = new SatSolver("open-wbo auto-partitions", "OpenWBO with auto-partitions", null, null, true);
         /** Outputs the raw CNF file only */
         public static final SatSolver CNF              = new SatSolver("cnf", "Output CNF to file", null, null, true);
         /** Outputs the raw WCNF file only */

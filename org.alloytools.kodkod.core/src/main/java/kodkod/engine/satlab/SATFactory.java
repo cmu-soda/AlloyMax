@@ -304,14 +304,17 @@ public abstract class SATFactory {
      * @param filename
      * @return
      */
-    public static SATFactory POpenWBO(String filename) {
+    public static SATFactory POpenWBO(String filename, boolean auto) {
         return new SATFactory() {
             @Override
             public SATSolver instance() {
                 final String executable = findStaticLibrary("open-wbo");
                 if (executable == null)
                     throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
-                return new ExternalPMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
+                if (auto)
+                    return new ExternalMaxSolver(executable, filename, "-formula=0", "-algorithm=3");
+                else
+                    return new ExternalPMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
             }
 
             @Override
