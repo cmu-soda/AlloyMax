@@ -101,6 +101,17 @@ public class BenchmarkMain {
 //        }
     }
 
+    public void solveMaxSatAll(long startTime) {
+        A4Reporter rep = new MyRep(startTime);
+        Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
+
+        A4Options options = myOption();
+        options.solver = A4Options.SatSolver.WCNF;
+
+        Command c = world.getAllCommands().get(0);
+        A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
+    }
+
     public void solveSatEnum(long startTime) {
 //        assert (evals != null);
 
@@ -178,10 +189,15 @@ public class BenchmarkMain {
             System.out.println("Solved: UNSAT");
             System.out.println("Solve time: " + solveTime);
         }
+
+        @Override
+        public void resultCNF(String filename) {
+            System.out.println("CNF File: " + filename);
+        }
     }
 
     private static void printUsage() {
-        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -p -auto");
+        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -all-opt -p -auto");
         System.exit(-1);
     }
 
@@ -190,6 +206,7 @@ public class BenchmarkMain {
         String maxsat = null;
         boolean partition = false;
         boolean autoPartition = false;
+        boolean allopt = false;
 //        List<String> exprs = new LinkedList<>();
 
         for (String arg : args) {
@@ -204,6 +221,8 @@ public class BenchmarkMain {
                 partition = true;
             else if (arg.equals("-auto"))
                 autoPartition = true;
+            else if (arg.equals("-all-opt"))
+                allopt = true;
             else
                 printUsage();
         }
@@ -223,14 +242,19 @@ public class BenchmarkMain {
 
         if (maxsat != null) {
             long startTime = System.currentTimeMillis();
-            if (partition) {
-                System.out.println("=============================\nSolve the MaxSat problem with partitions...");
-                benchmark.solveMaxSatPartition(startTime, autoPartition);
+            if (!allopt) {
+                if (partition) {
+                    System.out.println("=============================\nSolve the MaxSat problem with partitions...");
+                    benchmark.solveMaxSatPartition(startTime, autoPartition);
+                } else {
+                    System.out.println("=============================\nSolve the MaxSat problem...");
+                    benchmark.solveMaxSat(startTime);
+                }
+                System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
             } else {
-                System.out.println("=============================\nSolve the MaxSat problem...");
-                benchmark.solveMaxSat(startTime);
+                System.out.println("=============================\nFind all optimal solutions...");
+                benchmark.solveMaxSatAll(startTime);
             }
-            System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
         }
     }
 
