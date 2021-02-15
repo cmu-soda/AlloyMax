@@ -51,6 +51,24 @@ public class BenchmarkMain {
         A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
     }
 
+    public void generateCNF(long startTime, boolean maxsat, boolean partition) {
+        A4Reporter rep = new MyRep(startTime);
+        Module world = CompUtil.parseEverything_fromFile(rep, null, maxsat ? maxsatFilename : satFilename);
+
+        A4Options options = myOption();
+        if (maxsat) {
+            if (partition)
+                options.solver = A4Options.SatSolver.PWCNF;
+            else
+                options.solver = A4Options.SatSolver.WCNF;
+        } else {
+            options.solver = A4Options.SatSolver.CNF;
+        }
+
+        Command c = world.getAllCommands().get(0);
+        A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
+    }
+
     public void solveMaxSat(long startTime) {
         A4Reporter rep = new MyRep(startTime);
         Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
@@ -102,14 +120,7 @@ public class BenchmarkMain {
     }
 
     public void solveMaxSatAll(long startTime) {
-        A4Reporter rep = new MyRep(startTime);
-        Module world = CompUtil.parseEverything_fromFile(rep, null, maxsatFilename);
-
-        A4Options options = myOption();
-        options.solver = A4Options.SatSolver.WCNF;
-
-        Command c = world.getAllCommands().get(0);
-        A4Solution ans = TranslateAlloyToKodkod.execute_command(rep, world.getAllReachableSigs(), c, options);
+        generateCNF(startTime, true, false);
     }
 
     public void solveSatEnum(long startTime) {
@@ -197,7 +208,7 @@ public class BenchmarkMain {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -all-opt -p -auto");
+        System.out.println("Usage: -sat=<filename> -maxsat=<filename> -all-opt -p -auto -file-only");
         System.exit(-1);
     }
 
@@ -207,6 +218,7 @@ public class BenchmarkMain {
         boolean partition = false;
         boolean autoPartition = false;
         boolean allopt = false;
+        boolean fileOnly = false;
 //        List<String> exprs = new LinkedList<>();
 
         for (String arg : args) {
@@ -223,6 +235,8 @@ public class BenchmarkMain {
                 autoPartition = true;
             else if (arg.equals("-all-opt"))
                 allopt = true;
+            else if (arg.equals("-file-only"))
+                fileOnly = true;
             else
                 printUsage();
         }
@@ -232,12 +246,16 @@ public class BenchmarkMain {
 
         final BenchmarkMain benchmark = new BenchmarkMain(sat, maxsat);
         if (sat != null) {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("Enumeration number: " + benchmark.instCount)));
             // Enumerating Sat problem
             long startTime = System.currentTimeMillis();
             System.out.println("=============================\nEnumerate the Sat problem to get all solutions...");
-            benchmark.solveSatEnum(startTime);
-            System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
+            if (fileOnly) {
+                benchmark.generateCNF(startTime, false, false);
+            } else {
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("Enumeration number: " + benchmark.instCount)));
+                benchmark.solveSatEnum(startTime);
+                System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
+            }
         }
 
         if (maxsat != null) {
@@ -245,12 +263,24 @@ public class BenchmarkMain {
             if (!allopt) {
                 if (partition) {
                     System.out.println("=============================\nSolve the MaxSat problem with partitions...");
-                    benchmark.solveMaxSatPartition(startTime, autoPartition);
+                    if (fileOnly) {
+                        if (autoPartition)
+                            benchmark.generateCNF(startTime, true, false);
+                        else
+                            benchmark.generateCNF(startTime, true, true);
+                    } else {
+                        benchmark.solveMaxSatPartition(startTime, autoPartition);
+                        System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
+                    }
                 } else {
                     System.out.println("=============================\nSolve the MaxSat problem...");
-                    benchmark.solveMaxSat(startTime);
+                    if (fileOnly) {
+                        benchmark.generateCNF(startTime, true, false);
+                    } else {
+                        benchmark.solveMaxSat(startTime);
+                        System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
+                    }
                 }
-                System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
             } else {
                 System.out.println("=============================\nFind all optimal solutions...");
                 benchmark.solveMaxSatAll(startTime);
