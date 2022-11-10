@@ -1,6 +1,13 @@
+# AlloyMax
+
+This is the implementation and reproduction package of the work *AlloyMax: Bringing Maximum Satisfaction to Relational Specifications,* presented in FSE 2021. This repository contains AlloyMax source code, executable, the necessary libraries, the models used in the paper, and the scripts for running the benchmark.
+
+**The benchmark and its instructions can be found under the `benchmark` folder. The reset follows the original build instructions for Alloy.**
+
+## Alloy
 ![Logo](https://avatars3.githubusercontent.com/u/30268214?v=4&s=200)
 [![Build Status](https://travis-ci.org/AlloyTools/org.alloytools.alloy.svg?branch=master)](https://travis-ci.org/AlloyTools/org.alloytools.alloy)
-# Alloy
+
 
 Alloy 4 is a self-contained executable, which includes the Kodkod
 model finder and a variety of SAT solvers, as well as the standard
@@ -11,7 +18,7 @@ features.
 
 More documentation can be found at: http://alloytools.org/documentation.html.
 
-# Requirements
+## Requirements
 
 Alloy runs on all operating systems with a recent JVM (Java 6 or later). 
 It is made available as a runnable jar file with both a cross-platform SAT solver
@@ -20,7 +27,7 @@ It is made available as a runnable jar file with both a cross-platform SAT solve
 Note however that starting with macOS High Sierra, it is necessary to install a dedicated
 JVM to run Alloy on macOS. A `.pkg` file is provided for that purpose.
 
-# TL;DR
+## TL;DR
 
 Checkout the project and type ./gradlew. You find the executable JAR in org.alloytools.alloy.dist/target/org.alloytools.alloy.dist.jar after the build has finished.
 
@@ -41,11 +48,11 @@ Note: if you are behind a proxy, the call to `gradlew` is likely to fail, unless
           -Dhttps.proxyUser=XXXXX -Dhttps.proxyPassword=XXXXX \
           build
 
-## Building Alloy
+### Building Alloy
 
 The Alloy build is using a _bnd workspace_ setup using a maven layout. This means it can be build  with Gradle and  the Eclipse IDE for interactive development. Projects are setup to continuously deliver the executable.
 
-### Projects
+#### Projects
 
 The workspace is divided into a number of projects:
 
@@ -56,7 +63,7 @@ The workspace is divided into a number of projects:
 * [org.alloytools.kodkod.core](org.alloytools.kodkod.core) – Kodkod without native code
 * [org.alloytools.kodkod.native](org.alloytools.kodkod.native) – The native code libraries for kodkod
 
-### Relevant Project files
+#### Relevant Project files
 
 This workspace uses bnd. This means that the following have special meaning:
 
@@ -64,13 +71,13 @@ This workspace uses bnd. This means that the following have special meaning:
 * ./bnd.bnd – Settings for a project. This file will _drag_ in code in a JAR.
 * [cnf/central.xml](cnf/central.xml) – Dependencies from maven central
 
-### Eclipse
+#### Eclipse
 
 The workspace is setup for interactive development in Eclipse with the Bndtools plugin. Download [Eclipse](https://www.eclipse.org/downloads/) and install it. You can then `Import` existing projects from the Git workspace. You should be asked to install Bndtools from the market place. You can also install Bndtools directly from the [Eclipse Market](https://marketplace.eclipse.org/content/bndtools) place (see `Help/Marketplace` and search for `Bndtools`). 
 
 Bndtools will continuously create the final executable. The projects are setup to automatically update when a downstream project changes.
 
-### IntelliJ IDEA (Ultimate Edition only)
+#### IntelliJ IDEA (Ultimate Edition only)
 
 Ensure you have the [Osmorc] plugin is enabled, as this plugin is needed for
 Bndtools support. It should be enabled by default.
@@ -91,19 +98,19 @@ org.alloytools.alloy.application/src/main/java/edu/mit/csail/sdg/alloy4whole/Sim
 [Osmorc]: https://plugins.jetbrains.com/plugin/1816-osmorc
 
 
-### Gradle 
+#### Gradle 
 
 In the root of this workspace type `./gradlew`. This is a script that will download the correct version of gradle and run the build scripts. For settings look at [gradle.properties] and [settings.gradle].
 
-### Continuous Integration
+#### Continuous Integration
 
 The workspace is setup to build after every commit using Travis. It releases snapshots to `https://oss.sonatype.org/content/repositories/snapshots/org/alloytools/` for every CI build on Travis.
 
-### Building the DMG file for OSX systems
+#### Building the DMG file for OSX systems
 
 Currently only the executable jar in org.alloytools.alloy.dist/target/org.alloytools.alloy.dist.jar is build. In the `org.alloytools.alloy.dist` project, run `../gradlew macos`. This will leave the PKG file in `target/bundle`.
 
-## CONTRIBUTIONS
+### CONTRIBUTIONS
 
 Please read the [CONTRIBUTING](CONTRIBUTING.md) to understand how you can contribute.
 
