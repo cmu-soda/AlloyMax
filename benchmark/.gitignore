@@ -1,0 +1,12 @@
+.ipynb_checkpoints/
+open-wbo/
+open-wbo-bck/
+*out/
+__pycache__/
+*.zip
+models*/
+*.log
+*cnf
+*.ipynb
+new_*.csv
+one_*.csv

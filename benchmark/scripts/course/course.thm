@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<alloy>
+
+<view>
+
+<defaultnode/>
+
+<defaultedge/>
+
+<node>
+   <type name="Alice"/>
+   <type name="AM"/>
+   <type name="Compiler"/>
+   <type name="Course"/>
+   <type name="CS101"/>
+   <type name="Fri"/>
+   <type name="FriAM"/>
+   <type name="FriPM"/>
+   <type name="Int"/>
+   <type name="ML"/>
+   <type name="Mon"/>
+   <type name="MonAM"/>
+   <type name="MonPM"/>
+   <type name="OS"/>
+   <type name="PM"/>
+   <type name="SE"/>
+   <type name="String"/>
+   <type name="Student"/>
+   <type name="Thu"/>
+   <type name="ThuAM"/>
+   <type name="ThuPM"/>
+   <type name="Tue"/>
+   <type name="TueAM"/>
+   <type name="TuePM"/>
+   <type name="univ"/>
+   <type name="Wed"/>
+   <type name="WedAM"/>
+   <type name="WedPM"/>
+   <type name="seq/Int"/>
+</node>
+
+<node visible="no">
+   <type name="Day"/>
+   <type name="Lecture"/>
+   <type name="Time"/>
+</node>
+
+<edge visible="no">
+   <relation name="core"> <type name="Student"/> <type name="Course"/> </relation>
+   <relation name="day"> <type name="Lecture"/> <type name="Day"/> </relation>
+   <relation name="interests"> <type name="Student"/> <type name="Course"/> </relation>
+   <relation name="lectures"> <type name="Course"/> <type name="Lecture"/> </relation>
+   <relation name="time"> <type name="Lecture"/> <type name="Time"/> </relation>
+</edge>
+
+</view>
+
+</alloy>

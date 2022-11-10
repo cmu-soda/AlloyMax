@@ -1,0 +1,16 @@
+problem,part_trans,part_solve,part_result
+flush_reload,7046,94827,SAT
+flush_reload,7350,94063,SAT
+flush_reload,7125,97197,SAT
+flush_reload,6950,93981,SAT
+flush_reload,7222,93314,SAT
+meltdown,15562,270780,SAT
+meltdown,15467,268568,SAT
+meltdown,14870,276241,SAT
+meltdown,15399,277260,SAT
+meltdown,15505,268908,SAT
+spectre,28781,519665,SAT
+spectre,28508,509885,SAT
+spectre,28871,531191,SAT
+spectre,29427,516202,SAT
+spectre,28430,527601,SAT
