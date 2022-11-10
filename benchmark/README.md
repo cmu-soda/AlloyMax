@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/326310778.svg)](https://zenodo.org/badge/latestdoi/326310778)
 
 # AlloyMax Benchmark
-This is the reproduction package of the benchmarks used for the work *AlloyMax: Bringing Maximum Satisfaction to Relational Specifications,* which will appear in FSE 2021. This package contains AlloyMax executable, the necessary libraries, the models used in the paper, and the scripts for running the benchmark.
+This is the reproduction package of the benchmarks used for the work *AlloyMax: Bringing Maximum Satisfaction to Relational Specifications,* which appears in FSE 2021. This package contains AlloyMax executable, the necessary libraries, the models used in the paper, and the scripts for running the benchmark.
 
 ## System Requirements
 AlloyMax requires Java version >= 1.8. Although AlloyMax can run on both Windows and Linux machines, some of the back-end Sat/MaxSAT solvers can only run on Linux. Specifically, we use OpenWBO (to support partitioning) as the MaxSAT solver in our paper, which can only run on Linux. **Therefore, we suggest using a Linux machine to reproduce our results.**
@@ -22,10 +22,6 @@ numpy  1.19.4
 
 ## Install Instruction
 1. Clone this repository to your local machine.
-```
-cd <download directory>
-git clone https://github.com/SteveZhangBit/alloy-maxsat-benchmark.git
-```
 
 2. Run AlloyMax
 ```
@@ -212,8 +208,3 @@ cd <path>/<to>/<package>/scripts
 sh run.sh
 ```
 The result of each benchmark run can be found in one_result_max.csv, one_result_maxsat_part.csv (for spec-based partitioning), and one_result_maxsat_part_auto.cvs (for auto-partitioning) in the respective directories.
-
-## AlloyMax Source Code
-You can also access the source code of AlloyMax from: https://github.com/SteveZhangBit/org.alloytools.alloy/tree/maxsat
-
-This repository is a fork from the original Alloy project. Our modification is on branch ```maxsat```. You can follow the build instruction for Alloy to build AlloyMax.
