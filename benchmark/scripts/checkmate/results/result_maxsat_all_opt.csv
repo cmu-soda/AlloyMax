@@ -1,0 +1,16 @@
+problem,all_opt_trans,all_opt_solve,#opt_inst
+flush_reload,6851,99677,2
+flush_reload,7396,105520,2
+flush_reload,6149,103341,2
+flush_reload,7238,100592,2
+flush_reload,7336,98867,2
+meltdown,15341,298721,3
+meltdown,15268,310289,3
+meltdown,14569,314586,3
+meltdown,14912,311425,3
+meltdown,14737,297609,3
+spectre,28815,793344,3
+spectre,27657,775189,3
+spectre,28578,749008,3
+spectre,28527,777607,3
+spectre,28803,780001,3

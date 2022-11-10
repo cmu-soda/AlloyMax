@@ -1,0 +1,16 @@
+problem,sat_trans,sat_solve,#inst
+flush_reload,7514,67596,32
+flush_reload,7182,67518,32
+flush_reload,7105,66771,32
+flush_reload,7305,68716,32
+flush_reload,7500,67324,32
+meltdown,15280,612726,706
+meltdown,15344,623653,706
+meltdown,15593,623273,706
+meltdown,15283,609882,706
+meltdown,14790,624740,706
+spectre,28905,1213905,1412
+spectre,29373,1208040,1412
+spectre,28788,1218949,1412
+spectre,28708,1233581,1412
+spectre,28260,1202507,1412

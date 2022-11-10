@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<alloy>
+
+<view>
+
+<defaultnode/>
+
+<defaultedge/>
+
+<node>
+   <type name="ActionsModbus"/>
+   <type name="ActionsRest"/>
+   <type name="BackupEngWorkstation"/>
+   <type name="BackupHistorian"/>
+   <type name="BackupHMI"/>
+   <type name="BackupOPC"/>
+   <type name="BackupPrinter"/>
+   <type name="BackupSCADA"/>
+   <type name="Component"/>
+   <type name="DMZFirewall1"/>
+   <type name="DMZFirewall2"/>
+   <type name="EngWorkstation"/>
+   <type name="EngWorkstation1"/>
+   <type name="EngWorkstation2"/>
+   <type name="Firewall"/>
+   <type name="Function"/>
+   <type name="FunctionDevice"/>
+   <type name="Historian"/>
+   <type name="Historian1"/>
+   <type name="Historian2"/>
+   <type name="HistoryFunc"/>
+   <type name="HMI"/>
+   <type name="HMI1"/>
+   <type name="HMI2"/>
+   <type name="Int"/>
+   <type name="Internet"/>
+   <type name="NTP"/>
+   <type name="NTP1"/>
+   <type name="NTP2"/>
+   <type name="OPC"/>
+   <type name="OPC1"/>
+   <type name="OPC2"/>
+   <type name="Printer"/>
+   <type name="Printer1"/>
+   <type name="PrintFunc"/>
+   <type name="Relay"/>
+   <type name="Relay1"/>
+   <type name="Relay2"/>
+   <type name="RTU"/>
+   <type name="RTU1"/>
+   <type name="RTU2"/>
+   <type name="SCADA"/>
+   <type name="SCADA1"/>
+   <type name="SCADA2"/>
+   <type name="SetPointsRest"/>
+   <type name="StatusModbus"/>
+   <type name="StatusRest"/>
+   <type name="String"/>
+   <type name="Switch"/>
+   <type name="Switch1"/>
+   <type name="Switch2"/>
+   <type name="Switch3"/>
+   <type name="Switch4"/>
+   <type name="Time"/>
+   <type name="TransFunc"/>
+   <type name="univ"/>
+   <type name="VPN"/>
+   <type name="seq/Int"/>
+</node>
+
+<node color="Green">
+   <set name="this/AvailFunction" type="Function"/>
+</node>
+
+<node color="Red">
+   <set name="this/Compromised" type="Component"/>
+</node>
+
+<node shape="Trapezoid">
+   <type name="NetworkDevice"/>
+</node>
+
+<node visible="no">
+   <type name="Data"/>
+</node>
+
+<edge visible="no">
+   <relation name="consume"> <type name="Component"/> <type name="Data"/> </relation>
+   <relation name="dataCCPath"> <type name="Component"/> <type name="Data"/> <type name="Component"/> <type name="Component"/> </relation>
+   <relation name="dataflow"> <type name="Component"/> <type name="Component"/> </relation>
+   <relation name="dataflowPath"> <type name="Component"/> <type name="Data"/> <type name="Component"/> <type name="Component"/> </relation>
+   <relation name="produce"> <type name="Component"/> <type name="Data"/> </relation>
+</edge>
+
+</view>
+
+</alloy>

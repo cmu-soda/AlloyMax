@@ -1,0 +1,16 @@
+problem,maxsat_trans,maxsat_solve,maxsat_result
+flush_reload,7361,123128,SAT
+meltdown,15654,356492,SAT
+spectre,30436,640240,SAT
+flush_reload,7327,122173,SAT
+flush_reload,7207,122801,SAT
+flush_reload,7199,123184,SAT
+flush_reload,6911,123782,SAT
+meltdown,15394,347291,SAT
+meltdown,15908,353333,SAT
+meltdown,15221,353204,SAT
+meltdown,15311,358396,SAT
+spectre,29681,637537,SAT
+spectre,30107,630891,SAT
+spectre,30073,620579,SAT
+spectre,29472,643507,SAT
