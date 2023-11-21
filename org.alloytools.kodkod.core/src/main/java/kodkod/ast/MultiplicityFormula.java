@@ -46,7 +46,8 @@ public final class MultiplicityFormula extends Formula {
     }
 
     public void setSomePriority(int somePriority) {
-        assert (somePriority >= 0);
+        assert (!(multiplicity == Multiplicity.MAXSOME || multiplicity == Multiplicity.MINSOME || multiplicity == Multiplicity.SOFTNO)
+                || somePriority >= 0);
         this.somePriority = somePriority;
     }
 
