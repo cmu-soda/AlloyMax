@@ -64,6 +64,13 @@ public final class ExprQt extends Expr {
     /** Caches the span() result. */
     private Pos                  span;
 
+    /** This is used to identify the priority when maxsome/minsome is used as the quantifier. By Changjian Zhang */
+    private int somePriority = -1;
+
+    public int getSomePriority() {
+        return somePriority;
+    }
+
     /** Return the number of variables. */
     public int count() {
         int n = 0;
@@ -177,6 +184,10 @@ public final class ExprQt extends Expr {
                     ONE("one"),
                     /** some a,b:x | formula */
                     SOME("some"),
+                    /** maxsome ab:x | formula */
+                    MAXSOME("maxsome"),
+                    /** maxsome ab:x | formula */
+                    MINSOME("minsome"),
                     /** sum a,b:x | intExpression */
                     SUM("sum"),
                     /** { a,b:x | formula } */
@@ -189,6 +200,16 @@ public final class ExprQt extends Expr {
 
         /** The human readable label for this operator. */
         private final String label;
+
+        /**
+         * A wrapper make function which sets the priority for maxsome/minsome, by Changjian Zhang
+         */
+        public final Expr make(Pos pos, Pos closingBracket, List<Decl> decls, Expr sub, int priority) {
+            assert (priority >= 0);
+            Expr expr = make(pos, closingBracket, decls, sub);
+            ((ExprQt) expr).somePriority = priority;
+            return expr;
+        }
 
         /**
          * Constructs a quantification expression with "this" as the operator.
@@ -331,7 +352,7 @@ public final class ExprQt extends Expr {
             default :
                 sub = guard.and(this.sub);
         }
-        return op.make(pos, closingBracket, newdecls.makeConst(), sub);
+        return op.make(pos, closingBracket, newdecls.makeConst(), sub, somePriority);
     }
 
     // =============================================================================================================//

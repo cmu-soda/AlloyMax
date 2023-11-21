@@ -25,8 +25,7 @@ import static kodkod.ast.operator.FormulaOperator.AND;
 import static kodkod.ast.operator.FormulaOperator.IFF;
 import static kodkod.ast.operator.FormulaOperator.IMPLIES;
 import static kodkod.ast.operator.FormulaOperator.OR;
-import static kodkod.ast.operator.Quantifier.ALL;
-import static kodkod.ast.operator.Quantifier.SOME;
+import static kodkod.ast.operator.Quantifier.*;
 import static kodkod.util.nodes.AnnotatedNode.annotate;
 
 import java.util.AbstractList;
@@ -452,8 +451,9 @@ public abstract class Skolemizer extends AbstractReplacer {
         final Quantifier quant = qf.quantifier();
         final Decls decls = qf.decls();
 
-        if (skolemDepth >= 0 && (negated && quant == ALL || !negated && quant == SOME)) { // skolemizable
-                                                                                         // formula
+        if (skolemDepth >= 0 && (negated && quant == ALL ||
+                !negated && (quant == SOME || quant == MAXSOME || quant == MINSOME))) { // skolemizable
+                                                                                        // formula
             final List<Formula> rangeConstraints = new LinkedList<Formula>();
             final List<Formula> domConstraints = new LinkedList<Formula>();
 

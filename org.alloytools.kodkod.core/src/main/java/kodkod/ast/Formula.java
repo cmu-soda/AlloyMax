@@ -25,8 +25,7 @@ import static kodkod.ast.operator.FormulaOperator.AND;
 import static kodkod.ast.operator.FormulaOperator.IFF;
 import static kodkod.ast.operator.FormulaOperator.IMPLIES;
 import static kodkod.ast.operator.FormulaOperator.OR;
-import static kodkod.ast.operator.Quantifier.ALL;
-import static kodkod.ast.operator.Quantifier.SOME;
+import static kodkod.ast.operator.Quantifier.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +51,27 @@ public abstract class Formula extends Node {
     public static final Formula FALSE = new ConstantFormula(false) {};
 
     Formula() {}
+
+    /**
+     * This field defines whether this formula is a soft constraint or not
+     */
+    private boolean soft = false;
+
+    public final boolean isSoft() {
+        return soft;
+    }
+
+    public void setSoft(boolean soft, int priority) {
+        assert (!soft || priority >= 0);
+        this.soft = soft;
+        this.softFactPriority = priority;
+    }
+
+    private int softFactPriority = -1;
+
+    public int getSoftFactPriority() {
+        return softFactPriority;
+    }
 
     /**
      * Returns the constant formula with the given value.
@@ -245,6 +265,40 @@ public abstract class Formula extends Node {
 
     public final Formula forSome(Decls decls, Formula domain) {
         return quantify(SOME, decls, domain);
+    }
+
+    /**
+     *
+     * @param decls
+     * @return
+     */
+    public final Formula forMaxSome(Decls decls) {
+        Formula f = quantify(MAXSOME, decls);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
+    }
+
+    public final Formula forMaxSome(Decls decls, Formula domain) {
+        Formula f = quantify(MAXSOME, decls, domain);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
+    }
+
+    /**
+     *
+     * @param decls
+     * @return
+     */
+    public final Formula forMinSome(Decls decls) {
+        Formula f = quantify(MINSOME, decls);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
+    }
+
+    public final Formula forMinSome(Decls decls, Formula domain) {
+        Formula f = quantify(MINSOME, decls, domain);
+        ((QuantifiedFormula) f).setSomePriority(0); // make default priority to 0
+        return f;
     }
 
     /**

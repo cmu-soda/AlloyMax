@@ -23,6 +23,8 @@ Export-Package: \
 	kodkod.util.nodes
 
 -buildpath: \
+    org.sat4j.pb,\
+    org.sat4j.maxsat,\
 	org.sat4j.core,\
 	org.alloytools.kodkod.nativesat.util;version=latest,\
 	org.alloytools.kodkod.nativesat.amd64-linux;version=latest,\

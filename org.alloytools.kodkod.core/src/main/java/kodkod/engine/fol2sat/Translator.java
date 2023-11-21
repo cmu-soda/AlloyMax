@@ -21,44 +21,33 @@
  */
 package kodkod.engine.fol2sat;
 
-import static kodkod.engine.fol2sat.FormulaFlattener.flatten;
-import static kodkod.engine.fol2sat.Skolemizer.skolemize;
-import static kodkod.util.collections.Containers.setDifference;
-import static kodkod.util.nodes.AnnotatedNode.annotate;
-import static kodkod.util.nodes.AnnotatedNode.annotateRoots;
-
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
-import kodkod.ast.Expression;
-import kodkod.ast.Formula;
-import kodkod.ast.IntExpression;
-import kodkod.ast.Node;
-import kodkod.ast.Relation;
-import kodkod.ast.RelationPredicate;
+import kodkod.ast.*;
+import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.AbstractReplacer;
-import kodkod.engine.bool.BooleanAccumulator;
-import kodkod.engine.bool.BooleanConstant;
-import kodkod.engine.bool.BooleanFactory;
-import kodkod.engine.bool.BooleanFormula;
-import kodkod.engine.bool.BooleanMatrix;
-import kodkod.engine.bool.BooleanValue;
-import kodkod.engine.bool.Int;
-import kodkod.engine.bool.Operator;
+import kodkod.engine.bool.*;
 import kodkod.engine.config.Options;
 import kodkod.engine.hol.HOLTranslation;
 import kodkod.engine.hol.HOLTranslator;
 import kodkod.engine.hol.Proc;
+import kodkod.engine.satlab.MaxSATSolver;
+import kodkod.engine.satlab.PMaxSatSolver;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
 import kodkod.instance.TupleSet;
 import kodkod.util.ints.IndexedEntry;
+import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
 import kodkod.util.nodes.AnnotatedNode;
+import kodkod.util.nodes.Nodes;
+
+import java.util.*;
+
+import static kodkod.engine.fol2sat.FormulaFlattener.flatten;
+import static kodkod.engine.fol2sat.Skolemizer.skolemize;
+import static kodkod.util.collections.Containers.setDifference;
+import static kodkod.util.nodes.AnnotatedNode.annotate;
+import static kodkod.util.nodes.AnnotatedNode.annotateRoots;
 
 /**
  * Translates, evaluates, and approximates {@link Node nodes} with respect to
@@ -182,7 +171,92 @@ public final class Translator {
      *             but options.skolemize is false.
      */
     public static Translation.Whole translate(Formula formula, Bounds bounds, Options options) {
-        return (Translation.Whole) (new Translator(formula, bounds, options)).translate();
+        Translation.Whole translation = (Translation.Whole) (new Translator(formula, bounds, options)).translate();
+        makeSoftFacts(formula, translation);
+        appendMaxSatQuatifiers(translation, formula);
+        return translation;
+    }
+
+    /**
+     * FIXME: we can identify soft facts in the translation phase, not after translation.
+     * @param translation
+     */
+    private static void makeSoftFacts(Formula formula, Translation.Whole translation) {
+        boolean hasSoft = false;
+        for (Formula f : Nodes.roots(formula)) {
+            if (f.isSoft()) {
+                hasSoft = true;
+                break;
+            }
+        }
+        if (!hasSoft)
+            return;
+
+        TranslationLog log = translation.log();
+        if (log == null)
+            throw new IllegalStateException("To use soft facts, the solver should be a MaxSAT solver with logging enabled!");
+
+        MaxSATSolver wcnf = null;
+        for (Iterator<TranslationRecord> itr = log.replay(); itr.hasNext(); ) {
+            TranslationRecord record = itr.next();
+            if (log.roots().contains(record.translated()) && record.translated().isSoft()) {
+                if (wcnf == null) {
+                    if (!(translation.cnf() instanceof MaxSATSolver)) {
+                        throw new IllegalStateException("To use soft facts, the solver should be a MaxSAT solver!");
+                    }
+                    wcnf = (MaxSATSolver) translation.cnf();
+                }
+                // If this is a PWCNF, create a new group for each soft fact
+                if (wcnf instanceof PMaxSatSolver) {
+                    ((PMaxSatSolver) wcnf).addGroup();
+                }
+                wcnf.setSoftClause(new int[]{record.literal()}, record.translated().getSoftFactPriority());
+            }
+        }
+    }
+
+    /**
+     * TODO
+     * @param translation
+     * @param formula
+     *
+     * @author Changjian Zhang
+     */
+    private static void appendMaxSatQuatifiers(Translation.Whole translation, Formula formula) {
+        final MaximalityQuantifierFinder quantFinder = new MaximalityQuantifierFinder(new HashSet<>());
+        final Set<QuantifiedFormula> quantified = formula.accept(quantFinder);
+
+        // No maxsome or minsome quantifier are used in the formula
+        if (quantified.size() == 0) {
+            return;
+        }
+        // If contains MAXSOME or MINSOME
+        if (!(translation.cnf() instanceof MaxSATSolver)) {
+            throw new IllegalStateException("To use maxsome/minsome quantifiers, the solver should be a MaxSAT solver!");
+        }
+        final MaxSATSolver wcnf = (MaxSATSolver) translation.cnf();
+        // Add all the primary variables of the corresponding SkolemRelation as soft clauses
+        for (QuantifiedFormula q: quantified) {
+            for (Decl decl: q.decls()) {
+                // Get the primary variables by the name of the relation
+                final IntSet vars = translation.primaryVariables("$" + decl.variable().name());
+                if (vars == null) {
+                    // This is probably caused by the use of MAXSOME or MINSOME quantifier in set comprehension.
+                    throw new IllegalStateException("No primary variables for declaration: " + decl.variable().name());
+                }
+                final IntIterator iter = vars.iterator();
+                if (q.quantifier() == Quantifier.MAXSOME || q.quantifier() == Quantifier.MINSOME) {
+                    // If this is a PWCNF, create a new group for this maxsome/minsome quantified relation
+                    if (wcnf instanceof PMaxSatSolver) {
+                        ((PMaxSatSolver) wcnf).addGroup();
+                    }
+                    final int sign = q.quantifier() == Quantifier.MAXSOME ? 1 : -1;
+                    while (iter.hasNext()) {
+                        wcnf.addSoftClause(new int[]{ sign*iter.next() }, q.getSomePriority());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -528,6 +602,9 @@ public final class Translator {
      *             but this.options.skolemDepth < 0
      */
     private Translation translate() {
+        // When logging is enabled, this will flatten the original formula, i.e.,
+        // make ((f0 && f1) && f2) to (f0 && f1 && f2). This is originally used to get better unsat core, but is
+        // also necessary for maxsat. By Changjian Zhang
         final AnnotatedNode<Formula> annotated = logging ? annotateRoots(originalFormula) : annotate(originalFormula);
 
         // Remove bindings for unused relations/ints if this is not an

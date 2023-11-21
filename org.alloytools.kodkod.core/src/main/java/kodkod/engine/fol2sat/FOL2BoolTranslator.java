@@ -67,14 +67,7 @@ import kodkod.ast.operator.FormulaOperator;
 import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.operator.Quantifier;
 import kodkod.ast.visitor.ReturnVisitor;
-import kodkod.engine.bool.BooleanAccumulator;
-import kodkod.engine.bool.BooleanConstant;
-import kodkod.engine.bool.BooleanFactory;
-import kodkod.engine.bool.BooleanMatrix;
-import kodkod.engine.bool.BooleanValue;
-import kodkod.engine.bool.Dimensions;
-import kodkod.engine.bool.Int;
-import kodkod.engine.bool.Operator;
+import kodkod.engine.bool.*;
 import kodkod.util.ints.IndexedEntry;
 import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
@@ -142,7 +135,10 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
         final BooleanAccumulator acc = BooleanAccumulator.treeGate(Operator.AND);
 
         for (Formula root : Nodes.conjuncts(annotated.node())) {
-            acc.add(root.accept(translator));
+            BooleanValue v = root.accept(translator);
+            if (v instanceof BooleanFormula && root.isSoft())
+                ((BooleanFormula) v).setSoft(BooleanFormula.SoftConstraint.SOFTFACT);
+            acc.add(v);
         }
         logger.close();
         return acc;
@@ -757,6 +753,8 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 ret = interpreter.factory().accumulate(and);
                 break;
             case SOME :
+            case MAXSOME :
+            case MINSOME :
                 final BooleanAccumulator or = BooleanAccumulator.treeGate(Operator.OR);
                 some(quantFormula.decls(), quantFormula.formula(), 0, BooleanConstant.TRUE, or);
                 ret = interpreter.factory().accumulate(or);
@@ -923,8 +921,23 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
             case NO :
                 ret = child.none(env);
                 break;
+            case SOFTNO:
+                ret = child.none(env);
+                ((NotGate) ret).input(0).setSoft(BooleanFormula.SoftConstraint.SOFTNO);
+                ((NotGate) ret).input(0).setSomePriority(multFormula.getSomePriority());
+                break;
             case SOME :
                 ret = child.some(env);
+                break;
+            case MAXSOME :
+                ret = child.some(env);
+                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MAXSOME);
+                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
+                break;
+            case MINSOME :
+                ret = child.some(env);
+                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MINSOME);
+                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
                 break;
             case ONE :
                 ret = child.one(env);

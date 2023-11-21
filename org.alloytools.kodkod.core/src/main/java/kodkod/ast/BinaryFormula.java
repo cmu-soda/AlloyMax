@@ -53,6 +53,21 @@ public final class BinaryFormula extends Formula {
     }
 
     /**
+     * Override the setSoft function. For a binary formula, if the operator is FormulaOperator.AND, then the set
+     * function should also set the left and right sub-formula as soft formula. This is necessary when we flatten
+     * the formula. By Changjian Zhang
+     * @param soft
+     */
+    @Override
+    public void setSoft(boolean soft, int priority) {
+        super.setSoft(soft, priority);
+        if (op == FormulaOperator.AND) {
+            left.setSoft(soft, priority);
+            right.setSoft(soft, priority);
+        }
+    }
+
+    /**
      * Returns the left child of this.
      *
      * @return this.left

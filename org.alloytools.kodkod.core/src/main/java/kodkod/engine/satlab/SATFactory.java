@@ -91,6 +91,30 @@ public abstract class SATFactory {
                                                  };
 
     /**
+     * The factory that produces instances of the default sat4jmaxsat solver.
+     */
+    public static final SATFactory DefaultSAT4JMax = new SATFactory() {
+        @Override
+        public SATSolver instance() {
+            return new SAT4JMax();
+        }
+
+        @Override
+        public String toString() {
+            return "DefaultSAT4JMaxsat";
+        }
+
+        /**
+         * FIXME: For now, SAT4JMax does not support incremental solving.
+         * @return
+         */
+        @Override
+        public boolean incremental() {
+            return true;
+        }
+    };
+
+    /**
      * The factory that produces instances of the "light" sat4j solver. The light
      * solver is suitable for solving many small instances of SAT problems.
      *
@@ -220,6 +244,90 @@ public abstract class SATFactory {
                                                          return "Lingeling";
                                                      }
                                                  };
+
+    /**
+     *
+     * @param filename
+     * @return
+     */
+    public static SATFactory OpenWBOWeighted(String filename) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                return new ExternalMaxSolver(executable, filename);
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO Weighted";
+            }
+        };
+    }
+
+    /**
+     *
+     * @param filename
+     * @return
+     */
+    public static SATFactory OpenWBO(String filename) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                return new ExternalMaxSolver(executable, filename, "-formula=0", "-algorithm=2");
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO";
+            }
+        };
+    }
+
+    /**
+     *
+     * @param filename
+     * @return
+     */
+    public static SATFactory POpenWBO(String filename, boolean auto) {
+        return new SATFactory() {
+            @Override
+            public SATSolver instance() {
+                final String executable = findStaticLibrary("open-wbo");
+                if (executable == null)
+                    throw new IllegalArgumentException("Cannot find static library 'open-wbo'");
+                if (auto)
+                    return new ExternalMaxSolver(executable, filename, "-formula=0", "-algorithm=3");
+                else
+                    return new ExternalPMaxSolver(executable, filename, "-formula=2", "-algorithm=4");
+            }
+
+            @Override
+            public boolean incremental() {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "OpenWBO with partitions";
+            }
+        };
+    }
 
     /**
      * Returns a SATFactory that produces SATSolver wrappers for Armin Biere's

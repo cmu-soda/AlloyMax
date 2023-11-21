@@ -97,6 +97,28 @@ public abstract class Expr extends Browsable {
     /** This is an unmodifiable empty list of Err objects. */
     static final JoinableList<Err> emptyListOfErrors = new JoinableList<Err>();
 
+    /** This field defines whether this expression is a soft constraint or not. Modified by Changjian Zhang **/
+    private boolean soft = false;
+
+    public boolean isSoft() {
+        return soft;
+    }
+
+    public void setSoft(boolean soft, int priority) {
+        assert (!soft || priority >= 0);
+        this.soft = soft;
+        this.softFactPriority = priority;
+    }
+
+    /**
+     * This field defines the maxsat priority for this soft constraint.
+     */
+    private int softFactPriority = -1;
+
+    public int getSoftFactPriority() {
+        return softFactPriority;
+    }
+
     // ================================================================================================================//
 
     /**
@@ -1076,6 +1098,24 @@ public abstract class Expr extends Browsable {
      */
     public final Expr some() {
         return ExprUnary.Op.SOME.make(span(), this);
+    }
+
+    /**
+     * Returns the formula (maxsome this)
+     * <p>
+     * this must be a set or a relation
+     */
+    public final Expr maxsome() {
+        return ExprUnary.Op.MAXSOME.make(span(), this, 0);
+    }
+
+    /**
+     * Returns the formula (minsome this)
+     * <p>
+     * this must be a set or a relation
+     */
+    public final Expr minsome() {
+        return ExprUnary.Op.MINSOME.make(span(), this, 0);
     }
 
     /**

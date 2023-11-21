@@ -59,7 +59,7 @@ public class HOL2ProcTranslator extends AbstractReplacer {
             if (!skolemizableSoFar) {
                 skolemizable.push(false);
             } else {
-                if ((n instanceof BinaryFormula && ((BinaryFormula) n).op() == FormulaOperator.AND) || (n instanceof NaryFormula && ((NaryFormula) n).op() == FormulaOperator.AND) || (n instanceof QuantifiedFormula && ((QuantifiedFormula) n).quantifier() == Quantifier.SOME))
+                if ((n instanceof BinaryFormula && ((BinaryFormula) n).op() == FormulaOperator.AND) || (n instanceof NaryFormula && ((NaryFormula) n).op() == FormulaOperator.AND) || (n instanceof QuantifiedFormula && (((QuantifiedFormula) n).quantifier() == Quantifier.SOME || ((QuantifiedFormula) n).quantifier() == Quantifier.MAXSOME || ((QuantifiedFormula) n).quantifier() == Quantifier.MINSOME)))
                     skolemizable.push(true);
                 else
                     skolemizable.push(false);

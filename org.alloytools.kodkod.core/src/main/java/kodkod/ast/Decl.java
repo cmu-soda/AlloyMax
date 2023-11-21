@@ -53,7 +53,7 @@ public final class Decl extends Decls {
      * @throws IllegalArgumentException variable.arity != expression.arity
      */
     Decl(Variable variable, Multiplicity mult, Expression expression) {
-        if (mult == Multiplicity.NO)
+        if (mult == Multiplicity.NO || mult == Multiplicity.SOFTNO)
             throw new IllegalArgumentException("NO is not a valid multiplicity in a declaration.");
         if (variable.arity() != expression.arity())
             throw new IllegalArgumentException("Unmatched arities in a declaration: " + variable + " and " + expression);

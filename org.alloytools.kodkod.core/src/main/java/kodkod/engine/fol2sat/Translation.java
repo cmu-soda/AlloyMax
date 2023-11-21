@@ -36,6 +36,7 @@ import kodkod.util.ints.IndexedEntry;
 import kodkod.util.ints.IntIterator;
 import kodkod.util.ints.IntSet;
 import kodkod.util.ints.Ints;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Stores the translation of a Kodkod problem to CNF. A problem consists of a
@@ -116,6 +117,19 @@ public abstract class Translation {
      * @return this.vars[relation]
      */
     public abstract IntSet primaryVariables(Relation relation);
+
+    /**
+     * Returns the set of primary variables that represent the tuples in the given
+     * relation name. If no variables were allocated to the given relation, empty set
+     * is returned. This set contains exactly
+     * {@code this.bounds.upperBound(r).size() - this.bounds.lowerBound(r).size()}
+     * variable identifiers.
+     *
+     * @return this.vars[relation | relation.name = name]
+     */
+    public IntSet primaryVariables(String name) {
+        throw new NotImplementedException();
+    }
 
     /**
      * Returns the number of primary variables allocated during translation. Primary
@@ -282,6 +296,23 @@ public abstract class Translation {
         public IntSet primaryVariables(Relation relation) {
             final IntSet vars = primaryVarUsage.get(relation);
             return vars == null ? Ints.EMPTY_SET : vars;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see kodkod.engine.fol2sat.Translation#primaryVariables(java.lang.String)
+         */
+        @Override
+        public IntSet primaryVariables(String name) {
+            for (Map.Entry<Relation, IntSet> entry: primaryVarUsage.entrySet()) {
+                final Relation r = entry.getKey();
+                if (r.name().equals(name)) {
+                    final IntSet vars = entry.getValue();
+                    return vars == null ? Ints.EMPTY_SET : vars;
+                }
+            }
+            return null;
         }
 
         /**

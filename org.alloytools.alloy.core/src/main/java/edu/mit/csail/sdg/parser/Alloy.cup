@@ -20,7 +20,7 @@
  * parse the transformed token stream using this LALR(1) grammar.  For more information,
  * please refer to CompFilter.java
  */
- 
+
 package edu.mit.csail.sdg.parser;
 
 import java.util.Stack;
@@ -158,6 +158,7 @@ parser code {:
     ch.put(CompSym.EXH, "exh");
     ch.put(CompSym.EXPECT, "expect");
     ch.put(CompSym.EXTENDS, "extends");
+    ch.put(CompSym.SOFT, "soft");
     ch.put(CompSym.FACT, "fact");
     ch.put(CompSym.FOR, "for");
     ch.put(CompSym.FUN, "fun");
@@ -181,6 +182,7 @@ parser code {:
     ch.put(CompSym.MODULE, "module");
     ch.put(CompSym.NO2, "no");
     ch.put(CompSym.NO, "no");
+    ch.put(CompSym.SOFTNO, "softno");
     ch.put(CompSym.NONE, "none");
     ch.put(CompSym.NOT, "!");
     ch.put(CompSym.NOTEQUALS, "!");
@@ -213,6 +215,10 @@ parser code {:
     ch.put(CompSym.SLASH, "/");
     ch.put(CompSym.SOME2, "some");
     ch.put(CompSym.SOME, "some");
+    ch.put(CompSym.MAXSOME, "maxsome");
+    ch.put(CompSym.MAXSOME2, "maxsome");
+    ch.put(CompSym.MINSOME, "minsome");
+    ch.put(CompSym.MINSOME2, "minsome");
     ch.put(CompSym.STAR, "*");
     ch.put(CompSym.STRING, "String");
     ch.put(CompSym.SUM2, "sum");
@@ -413,6 +419,7 @@ terminal Pos EXACTLY;          //  exactly
 terminal Pos EXH;              //  exh exhaustive
 terminal Pos EXPECT;           //  expect
 terminal Pos EXTENDS;          //  extends
+terminal Pos SOFT;             //  soft
 terminal Pos FACT;             //  fact
 terminal Pos FOR;              //  for
 terminal Pos FUN;              //  fun
@@ -436,6 +443,7 @@ terminal Pos MINUS;            //  -
 terminal Pos MODULE;           //  module
 terminal Pos NO2;              //  no        // The filter enables us to disambiguate
 terminal Pos NO;               //  no        // The filter enables us to disambiguate
+terminal Pos SOFTNO;           //  softno
 terminal Pos NONE;             //  none
 terminal Pos NOT;              //  !      not
 terminal Pos NOTEQUALS;        //  !=     not=    // The filter allows whitespace/comment in between
@@ -468,6 +476,10 @@ terminal Pos SIGINT;           //  Int
 terminal Pos SLASH;            //  /
 terminal Pos SOME2;            //  some      // The filter enables us to disambiguate
 terminal Pos SOME;             //  some      // The filter enables us to disambiguate
+terminal Pos MAXSOME2;         //  maxsome for quantifier
+terminal Pos MAXSOME;          //  maxsome for multiplicity
+terminal Pos MINSOME2;         //  minsome for quantifier
+terminal Pos MINSOME;          //  minsome for multiplicity
 terminal Pos STAR;             //  *
 terminal Pos STRING;           //  String
 terminal Pos SUM2;             //  sum       // The filter enables us to disambiguate
@@ -577,6 +589,12 @@ Spec ::= Spec Vis:p OPEN:o Name:a LBRACKET SigRefs:b RBRACKET:c                {
 Spec ::= Spec Vis:p OPEN:o Name:a LBRACKET SigRefs:b RBRACKET   AS Name:c      {: nod(a); nod(c); parser.alloymodule.addOpen(o.merge(c.pos), p, a, b,    c);    :};
 Spec ::= Spec Vis:p ENUM:o Name:a LBRACE Names:n RBRACE:c                      {: nod(a);         parser.alloymodule.addEnum(o.merge(c),     p, a, n,    c);    :};
 Spec ::= Spec Vis:p ENUM:o Name:a LBRACE         RBRACE:c                      {: nod(a);         parser.alloymodule.addEnum(o.merge(c),     p, a, null, c);    :};
+Spec ::= Spec SOFT  FACT:o          Super:e {:         parser.alloymodule.addSoftFact  (o , ""       , e , 0); :};
+Spec ::= Spec SOFT  FACT:o   Name:n Super:e {: nod(n); parser.alloymodule.addSoftFact  (o , n.label  , e , 0); :};
+Spec ::= Spec SOFT  FACT:o   STR:n  Super:e {:         parser.alloymodule.addSoftFact  (o , n.string , e , 0); :};
+Spec ::= Spec SOFT  LBRACKET NUMBER:p RBRACKET FACT:o          Super:e {:         parser.alloymodule.addSoftFact  (o , ""       , e , p.num); :};
+Spec ::= Spec SOFT  LBRACKET NUMBER:p RBRACKET FACT:o   Name:n Super:e {: nod(n); parser.alloymodule.addSoftFact  (o , n.label  , e , p.num); :};
+Spec ::= Spec SOFT  LBRACKET NUMBER:p RBRACKET FACT:o   STR:n  Super:e {:         parser.alloymodule.addSoftFact  (o , n.string , e , p.num); :};
 Spec ::= Spec       FACT:o          Super:e {:         parser.alloymodule.addFact      (o , ""       , e); :};
 Spec ::= Spec       FACT:o   Name:n Super:e {: nod(n); parser.alloymodule.addFact      (o , n.label  , e); :};
 Spec ::= Spec       FACT:o   STR:n  Super:e {:         parser.alloymodule.addFact      (o , n.string , e); :};
@@ -619,14 +637,14 @@ Typescope  ::= TypeNumber:a Name:b  {:
 :};
 
 //[AM]: INT -> SIGINT
-Typescope ::= TypeNumber:a SIGINT:b  {: 
+Typescope ::= TypeNumber:a SIGINT:b  {:
    Pos p = a.pos.merge(b);
    if (a.endingScope>a.startingScope) throw new ErrorSyntax(p, "Cannot specify a growing scope for \"Int\"");
    if (a.isExact) throw new ErrorSyntax(p, "The exactly keyword is redundant here since the integer bitwidth must be exact.");
    RESULT = new CommandScope(p, new PrimSig("int", AttrType.WHERE.make(p)), a.isExact, a.startingScope, a.startingScope, 1);
 :};
 
-Typescope ::= TypeNumber:a INT:b  {: 
+Typescope ::= TypeNumber:a INT:b  {:
    Pos p = a.pos.merge(b);
    if (a.endingScope>a.startingScope) throw new ErrorSyntax(p, "Cannot specify a growing scope for \"Int\"");
    if (a.isExact) throw new ErrorSyntax(p, "The exactly keyword is redundant here since the integer bitwidth must be exact.");
@@ -822,6 +840,10 @@ Bind ::= LET     Let:x                {: RESULT = x;                            
 Bind ::= ALL2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ALL .make(o, null, a, b); :};
 Bind ::= NO2:o   Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.NO  .make(o, null, a, b); :};
 Bind ::= SOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SOME.make(o, null, a, b); :};
+Bind ::= MAXSOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MAXSOME.make(o, null, a, b, 0); :};
+Bind ::= MAXSOME2:o LBRACKET NUMBER:p RBRACKET Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MAXSOME.make(o, null, a, b, p.num); :};
+Bind ::= MINSOME2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MINSOME.make(o, null, a, b, 0); :};
+Bind ::= MINSOME2:o LBRACKET NUMBER:p RBRACKET Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.MINSOME.make(o, null, a, b, p.num); :};
 Bind ::= LONE2:o Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.LONE.make(o, null, a, b); :};
 Bind ::= ONE2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.ONE .make(o, null, a, b); :};
 Bind ::= SUM2:o  Declp:a SuperOrBar:b {: RESULT = ExprQt.Op.SUM .make(o, null, a, b); :};
@@ -878,7 +900,13 @@ CompareExprA ::= CompareExprB:a NOTLTE:o    ShiftExprA:b    {: RESULT=ExprBinary
 CompareExprA ::= CompareExprB:a NOTGTE:o    ShiftExprA:b    {: RESULT=ExprBinary.Op.NOT_GTE   .make(o, null, a, b);       :};
 CompareExprA ::= ALL:o  ShiftExprA                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprA ::= NO:o   ShiftExprA:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
+CompareExprA ::= SOFTNO:o   ShiftExprA:b                    {: RESULT=ExprUnary.Op.SOFTNO   .make(o, b, 0);   :};
+CompareExprA ::= SOFTNO:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                    {: RESULT=ExprUnary.Op.SOFTNO   .make(o, b, p.num);   :};
 CompareExprA ::= SOME:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
+CompareExprA ::= MAXSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, 0);   :};
+CompareExprA ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, p.num);   :};
+CompareExprA ::= MINSOME:o ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, 0);   :};
+CompareExprA ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprA:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, p.num);   :};
 CompareExprA ::= LONE:o ShiftExprA:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprA ::= ONE:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprA ::= SET:o  ShiftExprA:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};
@@ -899,7 +927,13 @@ CompareExprB ::= CompareExprB:a NOTLTE:o    ShiftExprB:b    {: RESULT=ExprBinary
 CompareExprB ::= CompareExprB:a NOTGTE:o    ShiftExprB:b    {: RESULT=ExprBinary.Op.NOT_GTE   .make(o, null, a, b);       :};
 CompareExprB ::= ALL:o  ShiftExprB                          {: if (1==1) throw new ErrorSyntax(o,"The \"all x\" construct is no longer supported. If you know the range of possible values of x, consider rewriting it as \"x == set_of_all_possible_values\"."); :};
 CompareExprB ::= NO:o   ShiftExprB:b                        {: RESULT=ExprUnary.Op.NO   .make(o, b);   :};
+CompareExprB ::= SOFTNO:o   ShiftExprB:b                    {: RESULT=ExprUnary.Op.SOFTNO   .make(o, b, 0);   :};
+CompareExprB ::= SOFTNO:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                    {: RESULT=ExprUnary.Op.SOFTNO   .make(o, b, p.num);   :};
 CompareExprB ::= SOME:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.SOME .make(o, b);   :};
+CompareExprB ::= MAXSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, 0);   :};
+CompareExprB ::= MAXSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MAXSOME .make(o, b, p.num);   :};
+CompareExprB ::= MINSOME:o ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, 0);   :};
+CompareExprB ::= MINSOME:o LBRACKET NUMBER:p RBRACKET ShiftExprB:b                     {: RESULT=ExprUnary.Op.MINSOME .make(o, b, p.num);   :};
 CompareExprB ::= LONE:o ShiftExprB:b                        {: RESULT=ExprUnary.Op.LONE .make(o, b);   :};
 CompareExprB ::= ONE:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.ONE  .make(o, b);   :};
 CompareExprB ::= SET:o  ShiftExprB:b                        {: RESULT=ExprUnary.Op.SETOF.make(o, b);   :};

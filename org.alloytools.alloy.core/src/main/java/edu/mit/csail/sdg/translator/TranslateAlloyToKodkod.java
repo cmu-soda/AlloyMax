@@ -55,17 +55,7 @@ import edu.mit.csail.sdg.ast.Sig;
 import edu.mit.csail.sdg.ast.Sig.Field;
 import edu.mit.csail.sdg.ast.Type;
 import edu.mit.csail.sdg.ast.VisitReturn;
-import kodkod.ast.BinaryExpression;
-import kodkod.ast.Decls;
-import kodkod.ast.ExprToIntCast;
-import kodkod.ast.Expression;
-import kodkod.ast.Formula;
-import kodkod.ast.IntConstant;
-import kodkod.ast.IntExpression;
-import kodkod.ast.IntToExprCast;
-import kodkod.ast.QuantifiedFormula;
-import kodkod.ast.Relation;
-import kodkod.ast.Variable;
+import kodkod.ast.*;
 import kodkod.ast.operator.ExprOperator;
 import kodkod.engine.CapacityExceededException;
 import kodkod.engine.fol2sat.HigherOrderDeclException;
@@ -283,6 +273,8 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
             }
         }
         k2pos_enabled = true;
+        // Note: fact { f1 && f2 } will be broke into fact { f1 } fact { f2 } here. This will affect maxsat behavior.
+        // By Changjian Zhang
         recursiveAddFormula(facts);
     }
 
@@ -641,8 +633,12 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
         if (!x.errors.isEmpty())
             throw x.errors.pick();
         Object y = visitThis(x);
-        if (y instanceof Formula)
+        if (y instanceof Formula) {
+            // If the Alloy expression is a soft constraint, then set the Kodkod formula to soft.
+            // Modified by Changjian Zhang
+            ((Formula) y).setSoft(x.isSoft(), x.getSoftFactPriority());
             return (Formula) y;
+        }
         throw new ErrorFatal(x.span(), "This should have been a formula.\nInstead it is " + y);
     }
 
@@ -834,12 +830,24 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
                 return k2pos(cform(x.sub).not(), x);
             case SOME :
                 return k2pos(cset(x.sub).some(), x);
+            case MAXSOME :
+                Formula f_max = k2pos(cset(x.sub).maxSome(), x);
+                ((MultiplicityFormula) f_max).setSomePriority(x.getSomePriority());
+                return f_max;
+            case MINSOME :
+                Formula f_min = k2pos(cset(x.sub).minSome(), x);
+                ((MultiplicityFormula) f_min).setSomePriority(x.getSomePriority());
+                return f_min;
             case LONE :
                 return k2pos(cset(x.sub).lone(), x);
             case ONE :
                 return k2pos(cset(x.sub).one(), x);
             case NO :
                 return k2pos(cset(x.sub).no(), x);
+            case SOFTNO:
+                Formula f_softno = k2pos(cset(x.sub).softno(), x);
+                ((MultiplicityFormula) f_softno).setSomePriority(x.getSomePriority());
+                return f_softno;
             case TRANSPOSE :
                 return cset(x.sub).transpose();
             case CARDINALITY :
@@ -1527,6 +1535,16 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
                 return ans.forSome(dd);
             guards.add(ans);
             return Formula.and(guards).forSome(dd);
+        } else if (op == ExprQt.Op.MAXSOME) {
+            if (guards.size() == 0)
+                return ans.forMaxSome(dd);
+            guards.add(ans);
+            return Formula.and(guards).forMaxSome(dd);
+        } else if (op == ExprQt.Op.MINSOME) {
+            if (guards.size() == 0)
+                return ans.forMinSome(dd);
+            guards.add(ans);
+            return Formula.and(guards).forMinSome(dd);
         } else {
             if (guards.size() == 0)
                 return ans.forAll(dd);
@@ -1543,6 +1561,14 @@ public final class TranslateAlloyToKodkod extends VisitReturn<Object> {
         else
             return visitThis(xx);
         Object ans = visit_qt(x.op, x.decls, x.sub);
+
+        // Update the minsome/maxsome priority, by Changjian Zhang
+
+        if (x.op == ExprQt.Op.MAXSOME || x.op == ExprQt.Op.MINSOME) {
+            if (ans instanceof QuantifiedFormula)
+                ((QuantifiedFormula) ans).setSomePriority(x.getSomePriority());
+        }
+
         if (ans instanceof Formula)
             k2pos((Formula) ans, x);
         return ans;

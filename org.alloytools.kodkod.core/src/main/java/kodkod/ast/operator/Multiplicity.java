@@ -41,6 +41,17 @@ public enum Multiplicity {
                               }
                           },
                           /**
+                           * <tt>softno expr</tt>: expr contains no or minimal elements. The 'softno' multiplicity
+                           * can only be used in a multiplicity formula.
+                           */
+                          SOFTNO {
+
+                              @Override
+                              public String toString() {
+                                    return "softno";
+                                }
+                          },
+                          /**
                            * <tt>lone expr</tt>: expr contains at most one element.
                            */
                           LONE {
@@ -66,6 +77,24 @@ public enum Multiplicity {
                               @Override
                               public String toString() {
                                   return "some";
+                              }
+                          },
+                          /**
+                           * <tt>maxsome expr</tt>: expr contains the most possible elements.
+                           */
+                          MAXSOME {
+                              @Override
+                              public String toString() {
+                                  return "maxsome";
+                              }
+                          },
+                          /**
+                            * <tt>minsome expr</tt>: expr contains the least possible elements.
+                            */
+                          MINSOME {
+                              @Override
+                              public String toString() {
+                                  return "minsome";
                               }
                           },
                           /**

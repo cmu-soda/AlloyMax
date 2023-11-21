@@ -183,11 +183,24 @@ public final class A4Options implements Serializable {
         public static final SatSolver CryptoMiniSatJNI = new SatSolver("cryptominisat(jni)", "CryptoMiniSat", null, null, true);
         /** SAT4J using native Java */
         public static final SatSolver SAT4J            = new SatSolver("sat4j", "SAT4J", null, null, true);
+        /** SAT4JMax using native Java */
+        public static final SatSolver SAT4JMax         = new SatSolver("sat4jmax", "SAT4JMax", null, null, true);
+        /** Open-wbo maxsat solver weighted */
+        public static final SatSolver OpenWBOWeighted  = new SatSolver("open-wbo weighted", "OpenWBO Weighted", null, null, true);
+        /** Open-wbo maxsat solver */
+        public static final SatSolver OpenWBO          = new SatSolver("open-wbo", "OpenWBO", null, null, true);
+        /** Open-wbo with partitions maxsat solver */
+        public static final SatSolver POpenWBO         = new SatSolver("open-wbo partitions", "OpenWBO with partitions", null, null, true);
+        /** Open-wbo with auto-partitions maxsat solver */
+        public static final SatSolver POpenWBOAuto     = new SatSolver("open-wbo auto-partitions", "OpenWBO with auto-partitions", null, null, true);
         /** Outputs the raw CNF file only */
         public static final SatSolver CNF              = new SatSolver("cnf", "Output CNF to file", null, null, true);
+        /** Outputs the raw WCNF file only */
+        public static final SatSolver WCNF             = new SatSolver("wcnf", "Output WCNF to file", null, null, true);
+        /** Outputs the raw PWCNF file only */
+        public static final SatSolver PWCNF            = new SatSolver("pwcnf", "Output PWCNF to file", null, null, true);
         /** Outputs the raw Kodkod file only */
         public static final SatSolver KK               = new SatSolver("kodkod", "Output Kodkod to file", null, null, true);
-
     }
 
     /** This ensures the class can be serialized reliably. */

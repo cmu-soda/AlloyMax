@@ -41,6 +41,18 @@ public final class QuantifiedFormula extends Formula {
     private final Formula    domain;
     private final Formula    body;
 
+    /** This field is used to identify the priority for minsome/maxsome quantifier */
+    private int somePriority = -1;
+
+    public int getSomePriority() {
+        return somePriority;
+    }
+
+    public void setSomePriority(int somePriority) {
+        assert (somePriority >= 0);
+        this.somePriority = somePriority;
+    }
+
     /**
      * Constructs a new quantified formula: quantifier decls | formula
      *

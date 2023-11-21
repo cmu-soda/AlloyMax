@@ -834,11 +834,15 @@ public final class SimInstance extends VisitReturn<Object> {
                 return trunc(cset(x.sub).size());
             case NO :
                 return cset(x.sub).empty();
+            case SOFTNO:
+                return true;    // SOFTNO should always be satisfied, by Changjian Zhang
             case LONE :
                 return cset(x.sub).longsize() <= 1;
             case ONE :
                 return cset(x.sub).longsize() == 1;
             case SOME :
+            case MAXSOME :
+            case MINSOME :
                 return cset(x.sub).longsize() >= 1;
             case NOT :
                 return cform(x.sub) ? Boolean.FALSE : Boolean.TRUE;
@@ -1013,7 +1017,7 @@ public final class SimInstance extends VisitReturn<Object> {
             return enumerate(null, 0, x, x.sub.not(), 0) == 0;
         if (x.op == ExprQt.Op.NO)
             return enumerate(null, 0, x, x.sub, 0) == 0;
-        if (x.op == ExprQt.Op.SOME)
+        if (x.op == ExprQt.Op.SOME || x.op == ExprQt.Op.MAXSOME || x.op == ExprQt.Op.MINSOME)
             return enumerate(null, 0, x, x.sub, 0) >= 1;
         if (x.op == ExprQt.Op.LONE)
             return enumerate(null, 0, x, x.sub, 0) <= 1;
@@ -1297,7 +1301,7 @@ public final class SimInstance extends VisitReturn<Object> {
                                     ExprBinary b = (ExprBinary) f;
                                     if (b.op == ExprBinary.Op.JOIN && b.left.isSame(s.decl.get()) && b.right.deNOP() instanceof Field) {
                                         String n = ((Field) (b.right.deNOP())).label;
-                                        if (u.op == ExprUnary.Op.SOME)
+                                        if (u.op == ExprUnary.Op.SOME || u.op == ExprUnary.Op.MAXSOME || u.op == ExprUnary.Op.MINSOME)
                                             return "The " + n + " cannot be empty.";
                                         if (u.op == ExprUnary.Op.LONE)
                                             return "The " + n + " cannot have more than one value.";

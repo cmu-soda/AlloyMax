@@ -34,10 +34,7 @@ import static kodkod.ast.operator.ExprOperator.PRODUCT;
 import static kodkod.ast.operator.ExprOperator.REFLEXIVE_CLOSURE;
 import static kodkod.ast.operator.ExprOperator.TRANSPOSE;
 import static kodkod.ast.operator.ExprOperator.UNION;
-import static kodkod.ast.operator.Multiplicity.LONE;
-import static kodkod.ast.operator.Multiplicity.NO;
-import static kodkod.ast.operator.Multiplicity.ONE;
-import static kodkod.ast.operator.Multiplicity.SOME;
+import static kodkod.ast.operator.Multiplicity.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -404,6 +401,26 @@ public abstract class Expression extends Node {
     }
 
     /**
+     * Returns the formula 'maxsome this'. The effect of this method is the same as
+     * calling this.apply(MAXSOME).
+     *
+     * @return this.apply(MAXSOME)
+     */
+    public final Formula maxSome() {
+        return apply(MAXSOME);
+    }
+
+    /**
+     * Returns the formula 'minsome this'. The effect of this method is the same as
+     * calling this.apply(MINSOME).
+     *
+     * @return this.apply(MINSOME)
+     */
+    public final Formula minSome() {
+        return apply(MINSOME);
+    }
+
+    /**
      * Returns the formula 'no this'. The effect of this method is the same as
      * calling this.apply(NO).
      *
@@ -411,6 +428,17 @@ public abstract class Expression extends Node {
      */
     public final Formula no() {
         return apply(NO);
+    }
+
+    /**
+     * Returns the formula 'softno this'. The effect of this method is the same as
+     * calling this.apply(SOFTNO).
+     *
+     * @return this.apply(SOFTNO)
+     * @author Changjian Zhang
+     */
+    public final Formula softno() {
+        return apply(SOFTNO);
     }
 
     /**
@@ -445,7 +473,10 @@ public abstract class Expression extends Node {
      * @throws IllegalArgumentException mult = SET
      */
     public final Formula apply(Multiplicity mult) {
-        return new MultiplicityFormula(mult, this);
+        MultiplicityFormula f = new MultiplicityFormula(mult, this);
+        if (MAXSOME.equals(mult) || MINSOME.equals(mult) || SOFTNO.equals(mult))
+            f.setSomePriority(0);
+        return f;
     }
 
     /**

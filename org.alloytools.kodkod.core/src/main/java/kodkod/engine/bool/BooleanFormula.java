@@ -37,6 +37,40 @@ public abstract class BooleanFormula extends BooleanValue implements Iterable<Bo
 
     private BooleanFormula negation;
 
+    public enum SoftConstraint { MAXSOME, MINSOME, SOFTFACT, SOFTNO }
+
+    /**
+     * This field is used to identify that this boolean formula represents a maxsome/minsome multiplicity formula.
+     * Also, it can be SOFTFACT which indicate this formula is a soft constraint, which is used to bypass the trivial
+     * solution check in Kodkod. Otherwise, its value should be null.
+     *
+     * @author Changjian Zhang
+     */
+    public SoftConstraint getSoft() {
+        return soft;
+    }
+
+    public void setSoft(SoftConstraint soft) {
+        this.soft = soft;
+    }
+
+    private SoftConstraint soft = null;
+
+    /**
+     * This field is used to track the priority for maxsome/minsome multiplicity formula.
+     *
+     * @author Changjian Zhang
+     */
+    public int getSomePriority() {
+        return somePriority;
+    }
+
+    public void setSomePriority(int somePriority) {
+        this.somePriority = somePriority;
+    }
+
+    private int somePriority = -1;
+
     /**
      * Constructs a boolean formula with the given negation.
      */

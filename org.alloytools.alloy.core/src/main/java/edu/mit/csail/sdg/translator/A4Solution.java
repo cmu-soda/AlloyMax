@@ -381,6 +381,46 @@ public final class A4Solution {
             solver.options().setSolver(SATFactory.MiniSatProver);
             solver.options().setLogTranslation(2);
             solver.options().setCoreGranularity(opt.coreGranularity);
+        } else if (opt.solver.equals(SatSolver.SAT4JMax)) {
+            solver.options().setSolver(SATFactory.DefaultSAT4JMax);
+            solver.options().setLogTranslation(2);
+            solver.options().setCoreGranularity(opt.coreGranularity);
+        } else if (opt.solver.equals(SatSolver.OpenWBO)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.OpenWBO(tmp.getAbsolutePath()));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
+        } else if (opt.solver.equals(SatSolver.OpenWBOWeighted)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.OpenWBOWeighted(tmp.getAbsolutePath()));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
+        } else if (opt.solver.equals(SatSolver.POpenWBO)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".pwcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.POpenWBO(tmp.getAbsolutePath(), false));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
+        } else if (opt.solver.equals(SatSolver.POpenWBOAuto)) {
+            try {
+                File tmp = File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory));
+                solver.options().setSolver(SATFactory.POpenWBO(tmp.getAbsolutePath(), true));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } catch (IOException e) {
+                throw new ErrorFatal("Cannot create temporary directory.", e);
+            }
         } else {
             solver.options().setSolver(SATFactory.DefaultSAT4J); // Even for
                                                                 // "KK" and
@@ -1376,9 +1416,10 @@ public final class A4Solution {
                     rep.solve(primaryVars, vars, clauses);
             }
         });
-        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.KK) && tryBookExamples) { // try
-                                                                                                       // book
-                                                                                                       // examples
+        if (!opt.solver.equals(SatSolver.CNF) && !opt.solver.equals(SatSolver.WCNF) && !opt.solver.equals(SatSolver.PWCNF)
+                && !opt.solver.equals(SatSolver.KK) && tryBookExamples) { // try
+                                                                          // book
+                                                                          // examples
             A4Reporter r = AlloyCore.isDebug() ? rep : null;
             try {
                 sol = BookExamples.trial(r, this, fgoal, solver, cmd.check);
@@ -1400,10 +1441,24 @@ public final class A4Solution {
             rep.resultCNF(out);
             return null;
         }
-        if (opt.solver.equals(SatSolver.CNF)) {
-            File tmpCNF = File.createTempFile("tmp", ".cnf", new File(opt.tempDirectory));
+        if (opt.solver.equals(SatSolver.CNF) || opt.solver.equals(SatSolver.WCNF) || opt.solver.equals(SatSolver.PWCNF)) {
+            File tmpCNF = opt.solver.equals(SatSolver.CNF) ?
+                    File.createTempFile("tmp", ".cnf", new File(opt.tempDirectory)) :
+                    (opt.solver.equals(SatSolver.WCNF) ?
+                            File.createTempFile("tmp", ".wcnf", new File(opt.tempDirectory)) :
+                            File.createTempFile("tmp", ".pwcnf", new File(opt.tempDirectory)));
             String out = tmpCNF.getAbsolutePath();
-            solver.options().setSolver(WriteCNF.factory(out));
+            if (opt.solver.equals(SatSolver.CNF))
+                solver.options().setSolver(WriteCNF.factory(out));
+            else if (opt.solver.equals(SatSolver.WCNF)) {
+                solver.options().setSolver(WriteWCNF.factory(out));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            } else {
+                solver.options().setSolver(WritePWCNF.factory(out));
+                solver.options().setLogTranslation(2);
+                solver.options().setCoreGranularity(opt.coreGranularity);
+            }
             try {
                 sol = solver.solve(fgoal, bounds);
             } catch (WriteCNF.WriteCNFCompleted ex) {

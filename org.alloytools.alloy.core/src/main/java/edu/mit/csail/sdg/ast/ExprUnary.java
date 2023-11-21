@@ -51,6 +51,13 @@ public final class ExprUnary extends Expr {
     /** Caches the span() result. */
     private Pos       span = null;
 
+    /** This is used to identify the priority when maxsome/minsome is used as the multifier. By Changjian Zhang */
+    private int somePriority = -1;
+
+    public int getSomePriority() {
+        return somePriority;
+    }
+
     // ============================================================================================================//
 
     /** {@inheritDoc} */
@@ -160,8 +167,14 @@ public final class ExprUnary extends Expr {
                     NOT("!"),
                     /** no x (where x is a set or relation) */
                     NO("no"),
+                    /** softno x (where x is a set or relation) */
+                    SOFTNO("softno"),
                     /** some x (where x is a set or relation) */
                     SOME("some"),
+                    /** maxsome x (where x is a set or relation) */
+                    MAXSOME("maxsome"),
+                    /** minsome x (where x is a set or relation) */
+                    MINSOME("minsome"),
                     /** lone x (where x is a set or relation) */
                     LONE("lone"),
                     /** one x (where x is a set or relation) */
@@ -190,6 +203,22 @@ public final class ExprUnary extends Expr {
 
         /** The human readable label for this operator */
         private final String label;
+
+        /** Wrapper function for make with priority for maxsome/minsome, by Changjian Zhang */
+        public final Expr make(Pos pos, Expr sub, int priority) {
+            assert (priority >= 0);
+            Expr expr = make(pos, sub);
+            ((ExprUnary) expr).somePriority = priority;
+            return expr;
+        }
+
+        /** Wrapper function for make with priority for maxsome/minsome, by Changjian Zhang */
+        public final Expr make(Pos pos, Expr sub, Err extraError, long extraWeight, int priority) {
+            assert (priority >= 0);
+            Expr expr = make(pos, sub, extraError, extraWeight);
+            ((ExprUnary) expr).somePriority = priority;
+            return expr;
+        }
 
         /**
          * Construct an ExprUnary node.
@@ -295,7 +324,10 @@ public final class ExprUnary extends Expr {
                         break;
                     case NOT :
                     case NO :
+                    case SOFTNO:
                     case SOME :
+                    case MAXSOME :
+                    case MINSOME :
                     case LONE :
                     case ONE :
                         type = Type.FORMULA;
@@ -370,8 +402,11 @@ public final class ExprUnary extends Expr {
                 break;
             case CARDINALITY :
             case NO :
+            case SOFTNO:
             case ONE :
             case SOME :
+            case MAXSOME :
+            case MINSOME :
             case LONE :
                 s = Type.removesBoolAndInt(sub.type);
                 break;
@@ -389,7 +424,7 @@ public final class ExprUnary extends Expr {
             warns.add(w1);
         if (w2 != null)
             warns.add(w2);
-        return (sub == this.sub) ? this : op.make(pos, sub, null, weight - (this.sub.weight));
+        return (sub == this.sub) ? this : op.make(pos, sub, null, weight - (this.sub.weight), somePriority);
     }
 
     // ============================================================================================================//

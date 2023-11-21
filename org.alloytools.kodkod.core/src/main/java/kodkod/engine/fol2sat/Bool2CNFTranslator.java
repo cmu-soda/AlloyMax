@@ -23,6 +23,7 @@ package kodkod.engine.fol2sat;
 
 import static kodkod.engine.bool.Operator.AND;
 
+import kodkod.ast.operator.Multiplicity;
 import kodkod.engine.bool.BooleanConstant;
 import kodkod.engine.bool.BooleanFactory;
 import kodkod.engine.bool.BooleanFormula;
@@ -32,6 +33,8 @@ import kodkod.engine.bool.ITEGate;
 import kodkod.engine.bool.MultiGate;
 import kodkod.engine.bool.NotGate;
 import kodkod.engine.bool.Operator;
+import kodkod.engine.satlab.MaxSATSolver;
+import kodkod.engine.satlab.PMaxSatSolver;
 import kodkod.engine.satlab.SATFactory;
 import kodkod.engine.satlab.SATSolver;
 import kodkod.util.ints.IntSet;
@@ -279,6 +282,15 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
      */
     @Override
     public final int[] visit(MultiGate multigate, Object arg) {
+        if (multigate.getSoft() != null && !(solver instanceof MaxSATSolver)) {
+            throw new IllegalStateException("To use maxsome/minsome/softno multiplicity operator, the solver should be a MaxSAT solver!");
+        }
+        // For partitioning MaxSAT solver, create a new group for this maxsome/minsome multiplicity formula.
+        // By Changjian Zhang
+        if (multigate.getSoft() != null && solver instanceof PMaxSatSolver) {
+            ((PMaxSatSolver) solver).addGroup();
+        }
+
         final int oLit = multigate.label();
         if (visited.add(oLit)) {
             final int sgn;
@@ -298,16 +310,85 @@ abstract class Bool2CNFTranslator implements BooleanVisitor<int[],Object> {
             for (BooleanFormula input : multigate) {
                 int iLit = input.accept(this, arg)[0];
                 if (p) {
-                    solver.addClause(clause(iLit * sgn, output));
+                    if (BooleanFormula.SoftConstraint.SOFTNO.equals(multigate.getSoft())) {
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn, output), multigate.getSomePriority());
+                        // If this formula is a softno x (where x is a relation) formula, then add additional
+                        // semantics to each tuple in relation x.
+                        if (input instanceof MultiGate) {
+                            additionalSemantics((MultiGate) input, arg);
+                        }
+                    } else {
+                        solver.addClause(clause(iLit * sgn, output));
+                    }
                 }
                 if (n) {
                     lastClause[i++] = iLit * -sgn;
+
+                    // We know that some r will be translated into (x1\/x2\/..\/xn\/-xout)/\(xout),
+                    // so here we make all the xi's to soft.
+                    // If the boolean formula is a multiplicity formula with maxsome and minsome,
+                    // then add the inputs as soft clauses.
+                    // Modified by Changjian Zhang
+                    if (BooleanFormula.SoftConstraint.MAXSOME.equals(multigate.getSoft())) {
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * -sgn), multigate.getSomePriority());
+                    } else if (BooleanFormula.SoftConstraint.MINSOME.equals(multigate.getSoft())) {
+                        ((MaxSATSolver) solver).addSoftClause(clause(iLit * sgn), multigate.getSomePriority());
+                        // If this formula is a minsome x (where x is a relation) formula, then add additional
+                        // semantics to each tuple in relation x.
+                        if (input instanceof MultiGate) {
+                            additionalSemantics((MultiGate) input, arg);
+                        }
+                    }
                 }
             }
             if (n) {
                 lastClause[i] = oLit * sgn;
                 solver.addClause(lastClause);
             }
+        }
+        return clause(oLit);
+    }
+
+    /**
+     * Add additional semantics for minsome.
+     *
+     * @author Changjian Zhang
+     */
+    private final int[] additionalSemantics(MultiGate multigate, Object arg) {
+        final int oLit = multigate.label();
+        final int sgn;
+        final boolean p, n;
+        if (multigate.op() == AND) {
+            sgn = 1;
+            p = !positive(oLit); // negate the polarity
+            n = !negative(oLit); // negate the polarity
+        } else { // multigate.op()==OR
+            sgn = -1;
+            n = !positive(oLit); // negate the polarity
+            p = !negative(oLit); // negate the polarity
+        }
+        final int[] lastClause = n ? new int[multigate.size() + 1] : null;
+        final int output = oLit * -sgn;
+        int i = 0;
+        for (BooleanFormula input : multigate) {
+            int iLit;
+            if (input instanceof BooleanVariable || input instanceof NotGate) {
+                iLit = input.accept(this, arg)[0];
+            } else if (input instanceof MultiGate) {
+                iLit = additionalSemantics((MultiGate) input, arg)[0];
+            } else {
+                throw new IllegalStateException("Unexpected boolean formula when adding additional semantics for minsome");
+            }
+            if (p) {
+                solver.addClause(clause(iLit * sgn, output));
+            }
+            if (n) {
+                lastClause[i++] = iLit * -sgn;
+            }
+        }
+        if (n) {
+            lastClause[i] = oLit * sgn;
+            solver.addClause(lastClause);
         }
         return clause(oLit);
     }
