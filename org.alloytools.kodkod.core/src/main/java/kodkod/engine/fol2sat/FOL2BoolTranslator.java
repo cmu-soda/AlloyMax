@@ -923,21 +923,27 @@ abstract class FOL2BoolTranslator implements ReturnVisitor<BooleanMatrix,Boolean
                 break;
             case SOFTNO:
                 ret = child.none(env);
-                ((NotGate) ret).input(0).setSoft(BooleanFormula.SoftConstraint.SOFTNO);
-                ((NotGate) ret).input(0).setSomePriority(multFormula.getSomePriority());
+                if (ret instanceof NotGate) {
+                    ((NotGate) ret).input(0).setSoft(BooleanFormula.SoftConstraint.SOFTNO);
+                    ((NotGate) ret).input(0).setSomePriority(multFormula.getSomePriority());
+                }
                 break;
             case SOME :
                 ret = child.some(env);
                 break;
             case MAXSOME :
                 ret = child.some(env);
-                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MAXSOME);
-                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
+                if (ret instanceof BooleanFormula) {
+                    ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MAXSOME);
+                    ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
+                }
                 break;
             case MINSOME :
                 ret = child.some(env);
-                ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MINSOME);
-                ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
+                if (ret instanceof BooleanFormula) {
+                    ((BooleanFormula) ret).setSoft(BooleanFormula.SoftConstraint.MINSOME);
+                    ((BooleanFormula) ret).setSomePriority(multFormula.getSomePriority());
+                }
                 break;
             case ONE :
                 ret = child.one(env);
