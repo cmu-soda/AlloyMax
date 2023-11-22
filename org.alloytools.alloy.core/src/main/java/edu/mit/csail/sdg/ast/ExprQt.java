@@ -205,9 +205,9 @@ public final class ExprQt extends Expr {
          * A wrapper make function which sets the priority for maxsome/minsome, by Changjian Zhang
          */
         public final Expr make(Pos pos, Pos closingBracket, List<Decl> decls, Expr sub, int priority) {
-            assert (priority >= 0);
-            Expr expr = make(pos, closingBracket, decls, sub);
-            ((ExprQt) expr).somePriority = priority;
+            ExprQt expr = (ExprQt) make(pos, closingBracket, decls, sub);
+            assert (!(expr.op == MAXSOME || expr.op == MINSOME) || priority >= 0);
+            expr.somePriority = priority;
             return expr;
         }
 

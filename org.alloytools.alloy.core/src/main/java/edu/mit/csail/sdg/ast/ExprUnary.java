@@ -206,17 +206,17 @@ public final class ExprUnary extends Expr {
 
         /** Wrapper function for make with priority for maxsome/minsome, by Changjian Zhang */
         public final Expr make(Pos pos, Expr sub, int priority) {
-            assert (priority >= 0);
-            Expr expr = make(pos, sub);
-            ((ExprUnary) expr).somePriority = priority;
+            ExprUnary expr = (ExprUnary) make(pos, sub);
+            assert (!(expr.op == MAXSOME || expr.op == MINSOME || expr.op == SOFTNO) || priority >= 0);
+            expr.somePriority = priority;
             return expr;
         }
 
         /** Wrapper function for make with priority for maxsome/minsome, by Changjian Zhang */
         public final Expr make(Pos pos, Expr sub, Err extraError, long extraWeight, int priority) {
-            assert (priority >= 0);
-            Expr expr = make(pos, sub, extraError, extraWeight);
-            ((ExprUnary) expr).somePriority = priority;
+            ExprUnary expr = (ExprUnary) make(pos, sub, extraError, extraWeight);
+            assert (!(expr.op == MAXSOME || expr.op == MINSOME || expr.op == SOFTNO) || priority >= 0);
+            expr.somePriority = priority;
             return expr;
         }
 
