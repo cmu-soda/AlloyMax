@@ -103,13 +103,17 @@ public class ExternalMaxSolver implements MaxSATSolver {
         writeCNF(weights);
 
         final String[] command = new String[options.length + 2];
-        Process p = null;
         BufferedReader out = null;
         command[0] = executable;
         System.arraycopy(options, 0, command, 1, options.length);
         command[command.length - 1] = inTemp;
         try {
-            p = Runtime.getRuntime().exec(command);
+            final Process p = Runtime.getRuntime().exec(command);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (p.isAlive()) {
+                    p.destroyForcibly();
+                }
+            }));
             new Thread(drain(p.getErrorStream())).start();
             out = outputReader(p);
             String line = null;

@@ -215,7 +215,6 @@ final class ExternalSolver implements SATSolver {
     public boolean solve() throws SATAbortedException {
         if (sat == null) {
             flush();
-            Process p = null;
             BufferedReader out = null;
             try {
                 cnf.seek(0);
@@ -226,7 +225,12 @@ final class ExternalSolver implements SATSolver {
                 command[0] = executable;
                 System.arraycopy(options, 0, command, 1, options.length);
                 command[command.length - 1] = inTemp;
-                p = Runtime.getRuntime().exec(command);
+                final Process p = Runtime.getRuntime().exec(command);
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    if (p.isAlive()) {
+                        p.destroyForcibly();
+                    }
+                }));
                 new Thread(drain(p.getErrorStream())).start();
                 out = outputReader(p);
                 String line = null;
